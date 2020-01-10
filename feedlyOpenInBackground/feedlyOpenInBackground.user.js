@@ -4,7 +4,7 @@
 // @version      1.0
 // @description  Open the currently-selected post in Feedly in a new background tab using the semicolon key. NOTE: this only works for the collapsed-titles layout - see the linked extension for more robust handling.
 // @author       Gavin Borg
-// @match        https://feedly.com/i/collection/*
+// @match        http*://feedly.com/*
 // @grant        GM_openInTab
 // ==/UserScript==
 
