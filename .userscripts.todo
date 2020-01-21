@@ -2,4 +2,6 @@
 	Could we add single-letter hotkeys to emc2summary/ pages for jumping to different sections?
 		Could this even make sense as an extension, generalized for all URLs based on the anchors?
 			How would we let users specify the URLs and limit the extension accordingly?
+		Could we make it configurable, even as a userscript?
+			https://stackoverflow.com/questions/14594346/create-a-config-or-options-page-for-a-greasemonkey-script
 	
