@@ -1,13 +1,3 @@
 ﻿# New Ideas
-	Can we replace feedly subscribe extension (gbbnddjfcllebfcnihfgmdplgaiejepc) with a userscript or bookmarklet?
-		The core logic appears to be basically getting the RSS URL and navigating to:
-			"https://feedly.com/i/subscription/feed/" + encodeURIComponent(feed_url);
-			Example result: https://feedly.com/i/subscription/feed/https://news.ycombinator.com/rss
-		It also finds the link itself on a normal page, though, with something like this:
-			var result = document.evaluate(
-				'//*[local-name()="link"][contains(@rel, "alternate")] ' +
-				'[contains(@type, "rss") or contains(@type, "atom") or ' +
-				'contains(@type, "rdf")]', document, null, 0, null);
-		Problem: picking between if there are multiple will involve further work, like generating a popup - this is straying outside of UserScript territory.
 	Could we add single-letter hotkeys to emc2summary/ pages for jumping to different sections?
 	
