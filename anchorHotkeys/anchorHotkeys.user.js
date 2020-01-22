@@ -4,7 +4,7 @@
 // @version      0.8
 // @description  Adds single-key hotkeys that jump to specific anchors on a page.
 // @author       Gavin Borg
-// @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
 // @grant        GM_registerMenuCommand
 // ==/UserScript==
 
