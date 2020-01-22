@@ -1,55 +1,73 @@
 // ==UserScript==
 // @name         Anchor Hotkeys
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      0.6
+// @version      0.7
 // @description  Adds single-key hotkeys that jump to specific anchors on a page.
 // @author       Gavin Borg
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @grant        GM_registerMenuCommand
 // ==/UserScript==
-/// @grant        GM_getValue
-/// @grant        GM_setValue
 
-// GDB TODO: make keys/anchor names configurable somewhere
 // GDB TODO: include warning about having to specify your own match/includes to make this work at all
 // GDB TODO: include warning about not having overlapping includes and/or matches
-// GDB TODO: don't respond when modifier keys are held down
+
+var configOpen = false; // Whether the config window is open, for our close-config hotkey (Escape).
 
 (function() {
     'use strict';
 
-    // Get sites that user has chosen to include or match
+    var matchingSite = getMatchingSite();
+    initConfig(matchingSite);
+
+    document.onkeyup = function(e) {
+        // Special cases: Ctrl+Comma (,) triggers config, Escape closes it
+        if (e.ctrlKey && e.key === ",") {
+            configOpen = true;
+            GM_config.open();
+        }
+        if (e.key === "Escape" && configOpen) {
+            GM_config.close();
+        }
+
+        // Otherwise, only single-button hotkeys are supported
+        if (e.shiftKey || e.ctrlKey || e.altKey) { return; }
+
+        // Find the corresponding anchor name (if any)
+        var anchorName = getAnchorNameForKey(matchingSite, e.key);
+        if (!anchorName) { return; }
+
+        // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
+        if (!anchorName.startsWith("#")) {
+            anchorName = "#" + anchorName;
+        }
+
+        // If the URL is already pointed to the spot we're interested in, remove it so we can re-add it and jump there again.
+        if (window.location.hash == anchorName) {
+            window.location.hash = "";
+        }
+
+        window.location.hash = anchorName;
+    }
+})();
+
+function getMatchingSite() {
+    // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
     var sites = GM_info.script.options.override.use_matches;
     sites.concat(GM_info.script.options.override.use_includes);
-    console.log(sites);
 
-    var url = window.location.href;
-    var matchingSite = "";
+    // Find matching site
+    var currentURL = window.location.href;
     for (var site of sites) {
         // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those.
         var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
-        if (siteRegex.test(url)) {
-            matchingSite = site; // First match always wins
-            break;
+        if (siteRegex.test(currentURL)) {
+            return site; // First match always wins
         }
     }
+}
 
-//     console.log(matchingSite);
-//     return;
-
-//     var fields = {};
-//     for (var site of sites) {
-//         for (var keyIndex = 1; keyIndex <= 6; keyIndex++) {
-//             fields[site + "_Key_" + keyIndex] = {
-//                 label: "Key to press",
-//                 type: "text"
-//             };
-//             fields[site + "_AnchorName_" + keyIndex] = {
-//                 label: "Anchor name",
-//                 type: "text"
-//             };
-//         }
-//     }
-
+function initConfig(matchingSite) {
+    // Build the 2 fields for each of the 10 available hotkeys
     var fields = {};
     for (var keyIndex = 1; keyIndex <= 10; keyIndex++) {
         fields[matchingSite + "_Key_" + keyIndex] = {
@@ -68,65 +86,26 @@
     GM_config.init({
         id: 'AnchorHotkeysConfig',
         title: "Anchor Hotkeys Config for: " + matchingSite,
-        fields: fields
+        fields: fields,
+        'events':
+        {
+            'open': function() { configOpen = true; },
+            'close': function() { configOpen = false; }
+        }
     });
 
-//     GM_config.init(
-//         {
-//             id: 'AnchorHotkeysConfig',
-//             title: "Anchor Hotkeys Config",
-//             fields:
-//             {
-//                 Site: {
-//                     label: "Site (from user includes + matches)",
-//                     type: "select",
-//                     options: sites
-//                 },
-//                 Key: {
-//                     label: "Key to press",
-//                     type: "text"
-//                 },
-//                 AnchorName: {
-//                     label: "Name of anchor to jump to",
-//                     type: "text"
-//                 }
-//             }
-//         });
+    // Add a menu item to the menu to launch the config
+    GM_registerMenuCommand('Configure hotkeys for this site', () => {
+        GM_config.open();
+    })
+}
 
-//     var site = GM_config.get("Site");
-//     var key = GM_config.get("Key");
-//     var anchorName = GM_config.get("AnchorName");
-//     alert(site + " " + key + " " + anchorName);
-
-    GM_config.open();
-
-    // These are the keys and anchors (including leading #) that those keys should jump to.
-    var anchorKeys = {
-        t: "#TOP",
-        d: "#DueDateInfo",
-        e: "#People",
-        a: "#AssociatedRecords",
-        i: "#Issues",
-        n: "#Notes",
-    };
-
-    document.onkeyup = function(e) {
-        // Find the corresponding anchor name (if any)
-//         var anchorName = anchorKeys[e.key];
-        var anchorName;
-        for (var keyIndex = 1; keyIndex <= 10; keyIndex++) {
-            if (GM_config.get(matchingSite + "_Key_" + keyIndex) == e.key) {
-                anchorName = GM_config.get(matchingSite + "_AnchorName_" + keyIndex);
-                break;
-            }
+function getAnchorNameForKey(matchingSite, key) {
+    for (var keyIndex = 1; keyIndex <= 10; keyIndex++) {
+        if (GM_config.get(matchingSite + "_Key_" + keyIndex) == key) { // GDB TODO turn this ID generation into a function
+            return GM_config.get(matchingSite + "_AnchorName_" + keyIndex); // GDB TODO handle missing # at start
         }
-        if(!anchorName) { return; }
-
-        // If the URL is already pointed to the spot we're interested in, remove it so we can re-add it and jump there again.
-        if(window.location.hash == anchorName) {
-            window.location.hash = "";
-        }
-
-        window.location.hash = anchorName;
     }
-})();
+
+    return "";
+}
