@@ -1,15 +1,12 @@
 // ==UserScript==
 // @name         Anchor Hotkeys
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      0.8
+// @version      1.0
 // @description  Adds single-key hotkeys that jump to specific anchors on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
 // @grant        GM_registerMenuCommand
 // ==/UserScript==
-
-// GDB TODO: include warning about having to specify your own match/includes to make this work at all
-// GDB TODO: include warning about not having overlapping includes and/or matches
 
 var configOpen = false; // Whether the config window is open, for our close-config hotkey (Escape).
 var config = GM_config;
