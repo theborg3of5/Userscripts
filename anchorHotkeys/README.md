@@ -11,3 +11,7 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 ### NOTES
 * This script uses the <b>first</b> matching user include/match to store/use your settings, so I'd recommend against overlapping rules there.
 * This script only supports single-button (non-modifier) hotkeys - that means hotkeys like `a`, not `Ctrl+a`.
+
+---
+
+Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/anchorHotkeys)
