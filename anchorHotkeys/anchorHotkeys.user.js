@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Anchor Hotkeys
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      0.7
+// @version      0.8
 // @description  Adds single-key hotkeys that jump to specific anchors on a page.
 // @author       Gavin Borg
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
@@ -12,28 +12,29 @@
 // GDB TODO: include warning about not having overlapping includes and/or matches
 
 var configOpen = false; // Whether the config window is open, for our close-config hotkey (Escape).
+var config = GM_config;
 
 (function() {
     'use strict';
 
-    var matchingSite = getMatchingSite();
-    initConfig(matchingSite);
+    var site = getMatchingSite();
+    initConfig(site);
 
     document.onkeyup = function(e) {
         // Special cases: Ctrl+Comma (,) triggers config, Escape closes it
         if (e.ctrlKey && e.key === ",") {
             configOpen = true;
-            GM_config.open();
+            config.open();
         }
         if (e.key === "Escape" && configOpen) {
-            GM_config.close();
+            config.close();
         }
 
         // Otherwise, only single-button hotkeys are supported
         if (e.shiftKey || e.ctrlKey || e.altKey) { return; }
 
         // Find the corresponding anchor name (if any)
-        var anchorName = getAnchorNameForKey(matchingSite, e.key);
+        var anchorName = getAnchorNameForKey(site, e.key);
         if (!anchorName) { return; }
 
         // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
@@ -66,29 +67,28 @@ function getMatchingSite() {
     }
 }
 
-function initConfig(matchingSite) {
-    // Build the 2 fields for each of the 10 available hotkeys
+function initConfig(site) {
+    // Build the key and anchorName fields for each of the 10 available hotkeys
     var fields = {};
-    for (var keyIndex = 1; keyIndex <= 10; keyIndex++) {
-        fields[matchingSite + "_Key_" + keyIndex] = {
+    for (var i = 1; i <= 10; i++) {
+        fields[keyField(site, i)] = {
             label: "Key to press:",
             title: "The single key to press to jump to this anchor",
             type: "text",
             labelPos: "above"
         };
-        fields[matchingSite + "_AnchorName_" + keyIndex] = {
+        fields[anchorNameField(site, i)] = {
             label: "Anchor name:",
             title: "The anchor to jump to",
             type: "text"
         };
     }
 
-    GM_config.init({
+    config.init({
         id: 'AnchorHotkeysConfig',
-        title: "Anchor Hotkeys Config for: " + matchingSite,
+        title: "Anchor Hotkeys Config for: " + site,
         fields: fields,
-        'events':
-        {
+        events: {
             'open': function() { configOpen = true; },
             'close': function() { configOpen = false; }
         }
@@ -96,16 +96,24 @@ function initConfig(matchingSite) {
 
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure hotkeys for this site', () => {
-        GM_config.open();
+        config.open();
     })
 }
 
-function getAnchorNameForKey(matchingSite, key) {
-    for (var keyIndex = 1; keyIndex <= 10; keyIndex++) {
-        if (GM_config.get(matchingSite + "_Key_" + keyIndex) == key) { // GDB TODO turn this ID generation into a function
-            return GM_config.get(matchingSite + "_AnchorName_" + keyIndex); // GDB TODO handle missing # at start
+function getAnchorNameForKey(site, key) {
+    for (var i = 1; i <= 10; i++) {
+        if (config.get(keyField(site, i)) == key) {
+            return config.get(anchorNameField(site, i));
         }
     }
 
     return "";
+}
+
+// We use the site as part of these IDs so that the IDs are unique per site.
+function keyField(site, index) {
+    return site + "_Key_" + index;
+}
+function anchorNameField(site, index) {
+    return site + "_AnchorName_" + index;
 }
