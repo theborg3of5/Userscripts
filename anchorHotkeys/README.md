@@ -15,3 +15,4 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 ---
 
 Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/anchorHotkeys)
+Available on [Greasy Fork](https://greasyfork.org/en/scripts/395551-anchor-hotkeys) for easy installation.
