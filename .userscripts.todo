@@ -1,11 +1,14 @@
 ﻿# New Ideas
-	Update anchor hotkeys to allow me to find "Setup and QA Instructions: " section, which has no anchor (or even ID)?
-		https://www.google.com/search?q=javascript+find+span+with+text&rlz=1C1GCEA_enUS824US824&oq=javascript+find+span+with+text&aqs=chrome.0.0l8.7162j0j1&sourceid=chrome&ie=UTF-8
-			Array.prototype.slice.call(document.getElementsByTagName("span")).filter(el => el.textContent.trim() === "Setup and QA Instructions:".trim());
-				Requires tag name ("span"), and text will have to be exact
-				<element from above array>.scrollIntoViewIfNeeded();
-			Should we also allow specifying by class/ID?
-				span.txtbu
-			What if we just try to get to whatever text they're asking for?
-		How would that work for config? Maybe a separate column of fields?
-		Should this just be a separate script, actually? "Scroll to anything you can specify with a selector or exact content (sans surrounding whitespace)?
+	Anchor hotkeys
+		Add settings export/import?
+		Figure out how to make settings cross http vs https when they're in the same site - maybe I should just grant it whatever the "set value" permission is?
+		Update to allow me to find "Setup and QA Instructions: " section, which has no anchor (or even ID)?
+			https://www.google.com/search?q=javascript+find+span+with+text&rlz=1C1GCEA_enUS824US824&oq=javascript+find+span+with+text&aqs=chrome.0.0l8.7162j0j1&sourceid=chrome&ie=UTF-8
+				Array.prototype.slice.call(document.getElementsByTagName("span")).filter(el => el.textContent.trim() === "Setup and QA Instructions:".trim());
+					Requires tag name ("span"), and text will have to be exact
+					<element from above array>.scrollIntoViewIfNeeded();
+				Should we also allow specifying by class/ID?
+					span.txtbu
+				What if we just try to get to whatever text they're asking for?
+			How would that work for config? Maybe a separate column of fields?
+			Should this just be a separate script, actually? "Scroll to anything you can specify with a selector or exact content (sans surrounding whitespace)?
