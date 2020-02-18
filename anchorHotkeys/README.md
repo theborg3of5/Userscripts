@@ -4,9 +4,9 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 1. Add the sites you want to either the user includes or user matches - this script does not run on any sites by default.
 2. Open one of the pages that match your sites.
 3. Open the settings page using either Ctrl+Comma or the sub-menu item for the script.
-4. Pick the single-button hotkeys (to link multiple keys to the same anchor, separate with spaces) and the corresponding anchor names (`<a id="X">` or `<a name="X">`) that go with them
+4. Enter the single-button hotkeys (to link multiple keys to the same anchor, separate with spaces) + either anchor names (`<a id="X">` or `<a name="X">`) or text to jump to.
 5. Save and close the settings and reload the page.
-6. Now, pressing the button in question should jump to the corresponding anchor.
+6. Now, pressing the button in question should jump to the corresponding anchor or text.
 
 ### NOTES
 * This script uses the <b>first</b> matching user include/match to store/use your settings, so I'd recommend against overlapping rules there.
@@ -23,6 +23,9 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
     * **This does mean that you'll lose any existing hotkeys if you saved them on the previous version.**
     * This should allow users to export/import settings using the "Storage" tab in Tampermonkey
     * Sites like http*://www.google.com/* should now work from both HTTP and HTTPS versions of the page (not just the one you saved the hotkeys on)
+* 1.2 (2/18/20)
+  * Rename script (Anchor Hotkeys => Jump to Text)
+  * Add support for jumping to specific text (within a single element) in addition to anchors
 
 ---
 

@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Anchor Hotkeys
+// @name         Jump to Text
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.1
-// @description  Adds single-key hotkeys that jump to specific anchors on a page.
+// @version      1.2
+// @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
 // @grant        GM_registerMenuCommand
@@ -32,21 +32,32 @@ var config = GM_config;
         // Otherwise, only single-button hotkeys are supported
         if (e.shiftKey || e.ctrlKey || e.altKey) { return; }
 
-        // Find the corresponding anchor name (if any)
+        // If there's a matching anchor name, jump to that anchor by updating the URL hash.
         var anchorName = getAnchorNameForKey(site, e.key);
-        if (!anchorName) { return; }
+        if(anchorName !== "") {
+            // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
+            if (!anchorName.startsWith("#")) {
+                anchorName = "#" + anchorName;
+            }
 
-        // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
-        if (!anchorName.startsWith("#")) {
-            anchorName = "#" + anchorName;
+            // If the URL is already pointed to the spot we're interested in, remove it so we can re-add it and jump there again.
+            if (window.location.hash == anchorName) {
+                window.location.hash = "";
+            }
+
+            window.location.hash = anchorName;
+            return;
         }
 
-        // If the URL is already pointed to the spot we're interested in, remove it so we can re-add it and jump there again.
-        if (window.location.hash == anchorName) {
-            window.location.hash = "";
+        // Otherwise try to find the first instance of the configured text
+        var text = getTextForKey(site, e.key);
+        if(text !== "") {
+            var firstElement = document.evaluate("//span[contains(text(), '" + text + "')]").iterateNext();
+            if(firstElement) {
+                firstElement.scrollIntoView();
+                return;
+            }
         }
-
-        window.location.hash = anchorName;
     }
 })();
 
@@ -67,25 +78,30 @@ function getMatchingSite() {
 }
 
 function initConfig(site) {
-    // Build the key and anchorName fields for each of the 10 available hotkeys
+    // Build the fields for each of the 10 available hotkeys
     var fields = {};
     for (var i = 1; i <= 10; i++) {
         fields[keyField(site, i)] = {
             label: "Key(s) to press:",
-            title: "The single key(s) to press to jump to this anchor. To have multiple keys jump to the same anchor, separate keys with a space (i.e. \"a r\" for both \"a\" and \"r\" keys ).",
+            title: "The single key(s) to press to jump to this anchor/text. To have multiple keys jump to the same place, separate keys with a space (i.e. \"a r\" for both \"a\" and \"r\" keys ).",
             type: "text",
             labelPos: "above"
         };
         fields[anchorNameField(site, i)] = {
             label: "Anchor name:",
-            title: "The anchor to jump to",
+            title: "The name or id of the anchor to jump to",
+            type: "text"
+        };
+        fields[textField(site, i)] = {
+            label: "Text to jump to:",
+            title: "We'll jump to the first instance of this text on the page. Ignored if anchor name is specified.",
             type: "text"
         };
     }
 
     config.init({
-        id: 'AnchorHotkeysConfig',
-        title: "Anchor Hotkeys Config for: " + site,
+        id: 'JumpToTextConfig',
+        title: "Jump to Text Config for: " + site,
         fields: fields,
         events: {
             'open': function() { configOpen = true; },
@@ -109,11 +125,24 @@ function getAnchorNameForKey(site, key) {
 
     return "";
 }
+function getTextForKey(site, key) {
+    for (var i = 1; i <= 10; i++) {
+        var keyAry = config.get(keyField(site, i).split(" "));
+        if (keyAry.includes(key)) {
+            return config.get(textField(site, i));
+        }
+    }
 
-// We use the site as part of these IDs so that the IDs are unique per site.
+    return "";
+}
+
+// We use the site as part of these IDs so that the configuration is separate per site.
 function keyField(site, index) {
     return site + "_Keys_" + index;
 }
 function anchorNameField(site, index) {
     return site + "_AnchorName_" + index;
+}
+function textField(site, index) {
+    return site + "_Text_" + index;
 }
