@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Anchor Hotkeys
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.0
+// @version      1.1
 // @description  Adds single-key hotkeys that jump to specific anchors on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
 // @grant        GM_registerMenuCommand
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
 var configOpen = false; // Whether the config window is open, for our close-config hotkey (Escape).
@@ -69,8 +71,8 @@ function initConfig(site) {
     var fields = {};
     for (var i = 1; i <= 10; i++) {
         fields[keyField(site, i)] = {
-            label: "Key to press:",
-            title: "The single key to press to jump to this anchor",
+            label: "Key(s) to press:",
+            title: "The single key(s) to press to jump to this anchor. To have multiple keys jump to the same anchor, separate keys with a space (i.e. \"a r\" for both \"a\" and \"r\" keys ).",
             type: "text",
             labelPos: "above"
         };
@@ -99,7 +101,8 @@ function initConfig(site) {
 
 function getAnchorNameForKey(site, key) {
     for (var i = 1; i <= 10; i++) {
-        if (config.get(keyField(site, i)) == key) {
+        var keyAry = config.get(keyField(site, i).split(" "));
+        if (keyAry.includes(key)) {
             return config.get(anchorNameField(site, i));
         }
     }
@@ -109,7 +112,7 @@ function getAnchorNameForKey(site, key) {
 
 // We use the site as part of these IDs so that the IDs are unique per site.
 function keyField(site, index) {
-    return site + "_Key_" + index;
+    return site + "_Keys_" + index;
 }
 function anchorNameField(site, index) {
     return site + "_AnchorName_" + index;
