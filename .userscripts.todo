@@ -8,5 +8,8 @@
 				Should we also allow specifying by class/ID?
 					span.txtbu
 				What if we just try to get to whatever text they're asking for?
+			Another option from here (using XPATH): https://stackoverflow.com/questions/37098405/javascript-queryselector-find-div-by-innertext
+				document.evaluate("//*[contains(text(), 'Setup and QA Instructions:')]", document, null, XPathResult.ANY_TYPE, null).iterateNext().scrollIntoView()
+				document.evaluate("//*[contains(text(), 'Setup and QA Instructions:')]").iterateNext().scrollIntoView()
 			How would that work for config? Maybe a separate column of fields?
 			Should this just be a separate script, actually? "Scroll to anything you can specify with a selector or exact content (sans surrounding whitespace)?
