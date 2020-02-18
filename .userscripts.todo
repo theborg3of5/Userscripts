@@ -1,7 +1,8 @@
 ﻿# New Ideas
 	Anchor hotkeys
 		Add settings export/import?
-		Consider a way to specify multiple, maybe comma- or semicolon-separated?
+		Consider a way to specify multiple hotkeys, maybe comma- or semicolon-separated?
+			Maybe space is better?
 		Figure out how to make settings cross http vs https when they're in the same site - maybe I should just grant it whatever the "set value" permission is?
 		Update to allow me to find "Setup and QA Instructions: " section, which has no anchor (or even ID)?
 			https://www.google.com/search?q=javascript+find+span+with+text&rlz=1C1GCEA_enUS824US824&oq=javascript+find+span+with+text&aqs=chrome.0.0l8.7162j0j1&sourceid=chrome&ie=UTF-8
