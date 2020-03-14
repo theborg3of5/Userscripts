@@ -21,6 +21,8 @@ var config = GM_config;
     initConfig(site);
 
     document.onkeyup = function(e) {
+        //console.log("Key caught: " + e.key);
+
         // Special cases: Ctrl+Comma (,) triggers config, Escape closes it
         if (e.ctrlKey && e.key === ",") {
             configOpen = true;
@@ -35,6 +37,7 @@ var config = GM_config;
 
         // If there's a matching anchor name, jump to that anchor by updating the URL hash.
         var anchorName = getAnchorNameForKey(site, e.key);
+        //console.log("Anchor name found: " + anchorName);
         if(anchorName !== "") {
             // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
             if (!anchorName.startsWith("#")) {
@@ -52,8 +55,9 @@ var config = GM_config;
 
         // Otherwise try to find the first instance of the configured text
         var text = getTextForKey(site, e.key);
+        //console.log("Text found: " + text);
         if(text !== "") {
-            var firstElement = document.evaluate("//span[contains(text(), '" + text + "')]").iterateNext();
+            var firstElement = document.evaluate("//*[contains(text(), '" + text + "')]").iterateNext();
             if(firstElement) {
                 firstElement.scrollIntoView();
                 return;
