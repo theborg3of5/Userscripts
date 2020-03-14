@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Jump to Text
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.2
+// @version      1.3
 // @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
