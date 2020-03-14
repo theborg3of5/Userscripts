@@ -5,6 +5,7 @@
 // @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
+// @match        https://greasyfork.org/en/scripts/395551-jump-to-text
 // @grant        GM_registerMenuCommand
 // @grant        GM_getValue
 // @grant        GM_setValue

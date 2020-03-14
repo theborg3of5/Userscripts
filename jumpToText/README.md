@@ -26,6 +26,9 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 * 1.2 (2/18/20)
   * Rename script (Anchor Hotkeys => Jump to Text)
   * Add support for jumping to specific text (within a single element) in addition to anchors
+* 1.3 (3/14/20)
+  * Add a default match (for this page) to abide by Greasy Fork's new guidelines. Feel free to disable this after install.
+  * Fix issue with finding text in elements other than spans
 
 ---
 
