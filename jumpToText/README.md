@@ -16,7 +16,8 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 ---
 
 #### Changelog
-* 1.0 (1/22/20) - Initial release
+* 1.0 (1/22/20)
+  * Initial release
 * 1.1 (2/18/20)
   * Add support for multiple hotkeys per anchor (separate them with spaces)
   * Move settings to local storage so that they span sites.
@@ -29,6 +30,9 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 * 1.3 (3/14/20)
   * Add a default match (for this page) to abide by Greasy Fork's new guidelines. Feel free to disable this after install.
   * Fix issue with finding text in elements other than spans
+* 1.4 (5/1/20)
+  * Fix issue where saving any site would overwrite the config for all other sites
+  * Close the config window on save, so it's clearer that something happened.
 
 ---
 

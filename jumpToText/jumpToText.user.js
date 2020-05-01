@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Jump to Text
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.3
+// @version      1.4
 // @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
@@ -13,11 +13,13 @@
 
 var configOpen = false; // Whether the config window is open, for our close-config hotkey (Escape).
 var config = GM_config;
+var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
 
 (function() {
     'use strict';
 
     var site = getMatchingSite();
+    var siteClean = cleanSite(site);
     initConfig(site);
 
     document.onkeyup = function(e) {
@@ -33,10 +35,10 @@ var config = GM_config;
         }
 
         // Otherwise, only single-button hotkeys are supported
-        if (e.shiftKey || e.ctrlKey || e.altKey) { return; }
+        if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) { return; }
 
         // If there's a matching anchor name, jump to that anchor by updating the URL hash.
-        var anchorName = getAnchorNameForKey(site, e.key);
+        var anchorName = getAnchorNameForKey(siteClean, e.key);
         //console.log("Anchor name found: " + anchorName);
         if(anchorName !== "") {
             // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
@@ -54,7 +56,7 @@ var config = GM_config;
         }
 
         // Otherwise try to find the first instance of the configured text
-        var text = getTextForKey(site, e.key);
+        var text = getTextForKey(siteClean, e.key);
         //console.log("Text found: " + text);
         if(text !== "") {
             var firstElement = document.evaluate("//*[contains(text(), '" + text + "')]").iterateNext();
@@ -83,21 +85,23 @@ function getMatchingSite() {
 }
 
 function initConfig(site) {
-    // Build the fields for each of the 10 available hotkeys
+    var siteClean = cleanSite(site);
+
+    // Build the fields for each of the available hotkeys
     var fields = {};
-    for (var i = 1; i <= 10; i++) {
-        fields[keyField(site, i)] = {
+    for (var i = 1; i <= maxNumHotkeys; i++) {
+        fields[keyField(siteClean, i)] = {
             label: "Key(s) to press:",
             title: "The single key(s) to press to jump to this anchor/text. To have multiple keys jump to the same place, separate keys with a space (i.e. \"a r\" for both \"a\" and \"r\" keys ).",
             type: "text",
             labelPos: "above"
         };
-        fields[anchorNameField(site, i)] = {
+        fields[anchorNameField(siteClean, i)] = {
             label: "Anchor name:",
             title: "The name or id of the anchor to jump to",
             type: "text"
         };
-        fields[textField(site, i)] = {
+        fields[textField(siteClean, i)] = {
             label: "Text to jump to:",
             title: "We'll jump to the first instance of this text on the page. Ignored if anchor name is specified.",
             type: "text"
@@ -105,12 +109,13 @@ function initConfig(site) {
     }
 
     config.init({
-        id: 'JumpToTextConfig',
+        id: 'JumpToTextConfig' + siteClean,
         title: "Jump to Text Config for: " + site,
         fields: fields,
         events: {
             'open': function() { configOpen = true; },
-            'close': function() { configOpen = false; }
+            'close': function() { configOpen = false; },
+            'save': function() { config.close(); }
         }
     });
 
@@ -120,8 +125,12 @@ function initConfig(site) {
     })
 }
 
+function cleanSite(site) {
+    return site.replace(/[\*/:]/g, ""); // Drop */: characters from site for use in ID
+}
+
 function getAnchorNameForKey(site, key) {
-    for (var i = 1; i <= 10; i++) {
+    for (var i = 1; i <= maxNumHotkeys; i++) {
         var keyAry = config.get(keyField(site, i).split(" "));
         if (keyAry.includes(key)) {
             return config.get(anchorNameField(site, i));
@@ -131,7 +140,7 @@ function getAnchorNameForKey(site, key) {
     return "";
 }
 function getTextForKey(site, key) {
-    for (var i = 1; i <= 10; i++) {
+    for (var i = 1; i <= maxNumHotkeys; i++) {
         var keyAry = config.get(keyField(site, i).split(" "));
         if (keyAry.includes(key)) {
             return config.get(textField(site, i));
