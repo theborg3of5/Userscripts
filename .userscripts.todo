@@ -1,2 +1,6 @@
 ﻿# New Ideas
 	Can we get Feedly background hotkey working in Firefox, too?
+
+# Jump to Text
+	Issue: the config is overwritten per-site, so I can't actually make it work with multiple sites without multiple script instances
+	Consider adding a "Saved!" popup/toast or something when the save button is clicked, or at least close the popup too
