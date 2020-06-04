@@ -9,7 +9,7 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 6. Now, pressing the button in question should jump to the corresponding anchor or text.
 
 ### Notes
-* This script uses the <b>first</b> matching user include/match to store/use your settings, so I'd recommend against overlapping rules there.
+* This script uses the <b>first</b> matching user include/match to store/retrieve your settings, so I'd recommend against overlapping rules there.
 * This script only supports single-button (non-modifier) hotkeys - that means hotkeys like `a`, not `Ctrl+a`.
 * The settings are saved locally, so you should be able to export/import as needed using the "Storage" tab in Tampermonkey or similar.
 
