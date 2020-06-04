@@ -19,7 +19,6 @@ var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
     'use strict';
 
     var site = getMatchingSite();
-    var siteClean = cleanSite(site);
     initConfig(site);
 
     document.onkeyup = function(e) {
@@ -37,6 +36,7 @@ var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
         // Otherwise, only single-button hotkeys are supported
         if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) { return; }
 
+        var siteClean = cleanSite(site);
         // If there's a matching anchor name, jump to that anchor by updating the URL hash.
         var anchorName = getAnchorNameForKey(siteClean, e.key);
         //console.log("Anchor name found: " + anchorName);
@@ -126,7 +126,7 @@ function initConfig(site) {
 }
 
 function cleanSite(site) {
-    return site.replace(/[\*/:]/g, ""); // Drop */: characters from site for use in ID
+    return site.replace(/[\*/:\?\.]/g, ""); // Drop */:?. characters from site for use in ID
 }
 
 function getAnchorNameForKey(site, key) {
