@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Fix New-Window Links (Remove target Attribute)
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/theborg3of5/Userscripts/
 // @version      1.0
 // @description  Remove the target attribute from the links matching the given string.
 // @author       Gavin Borg
-// @match        https://guru/Search.aspx?*
+// @match        
 // @grant        none
 // ==/UserScript==
 
-var linkQueryStrings = ["#divHubbleRecLinks .rec-links a[target=_blank]"];
+var linkQueryStrings = [""];
 
 (function() {
     'use strict';
