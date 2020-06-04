@@ -1,2 +1,5 @@
 ﻿# New Ideas
 	Can we get Feedly background hotkey working in Firefox, too?
+	Jump to Text - do we really need to include the site "ID" as part of each field's ID, or is it fine since it's stored a level down in the json?
+		If I do change it, make sure no one else is using the script (and add a warning about losing config).
+		To change: remove site bit from *Field() functions
