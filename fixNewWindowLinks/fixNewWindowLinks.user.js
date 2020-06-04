@@ -4,11 +4,11 @@
 // @version      1.0
 // @description  Remove the target attribute from the links matching the given string.
 // @author       Gavin Borg
-// @match        
+// @match        https://guru/Search.aspx?*
 // @grant        none
 // ==/UserScript==
 
-var linkQueryStrings = [""];
+var linkQueryStrings = ["#divHubbleRecLinks .rec-links a[target=_blank]"];
 
 (function() {
     'use strict';
