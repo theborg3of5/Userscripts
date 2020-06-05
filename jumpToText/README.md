@@ -35,6 +35,8 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
   * Close the config window on save, so it's clearer that something happened.
 * 1.5 (6/4/20)
   * Slight tweak in how we store settings - any sites that contain periods (.) or question marks (?) will appear to lose their config - you can find the config in storage if needed.
+* 1.6 (6/5/20)
+  * Further simplifying how we store settings - you'll need to recreate your hotkeys after this update (but your old config will still be in storage if needed).
 
 ---
 

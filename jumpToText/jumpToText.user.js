@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Jump to Text
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.5
+// @version      1.6
 // @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
@@ -18,8 +18,7 @@ var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
 (function() {
     'use strict';
 
-    var site = getMatchingSite();
-    initConfig(site);
+    initConfig(getMatchingSite());
 
     document.onkeyup = function(e) {
         //console.log("Key caught: " + e.key);
@@ -36,9 +35,8 @@ var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
         // Otherwise, only single-button hotkeys are supported
         if (e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) { return; }
 
-        var siteClean = cleanSite(site);
         // If there's a matching anchor name, jump to that anchor by updating the URL hash.
-        var anchorName = getAnchorNameForKey(siteClean, e.key);
+        var anchorName = getAnchorNameForKey(e.key);
         //console.log("Anchor name found: " + anchorName);
         if(anchorName !== "") {
             // Make sure the anchor name starts with a hash (because that's how it's formatted in window.location.hash)
@@ -56,7 +54,7 @@ var maxNumHotkeys = 15; // How many hotkeys are configurable per site.
         }
 
         // Otherwise try to find the first instance of the configured text
-        var text = getTextForKey(siteClean, e.key);
+        var text = getTextForKey(e.key);
         //console.log("Text found: " + text);
         if(text !== "") {
             var firstElement = document.evaluate("//*[contains(text(), '" + text + "')]").iterateNext();
@@ -90,18 +88,18 @@ function initConfig(site) {
     // Build the fields for each of the available hotkeys
     var fields = {};
     for (var i = 1; i <= maxNumHotkeys; i++) {
-        fields[keyField(siteClean, i)] = {
+        fields[keyField(i)] = {
             label: "Key(s) to press:",
             title: "The single key(s) to press to jump to this anchor/text. To have multiple keys jump to the same place, separate keys with a space (i.e. \"a r\" for both \"a\" and \"r\" keys ).",
             type: "text",
             labelPos: "above"
         };
-        fields[anchorNameField(siteClean, i)] = {
+        fields[anchorNameField(i)] = {
             label: "Anchor name:",
             title: "The name or id of the anchor to jump to",
             type: "text"
         };
-        fields[textField(siteClean, i)] = {
+        fields[textField(i)] = {
             label: "Text to jump to:",
             title: "We'll jump to the first instance of this text on the page. Ignored if anchor name is specified.",
             type: "text"
@@ -129,34 +127,33 @@ function cleanSite(site) {
     return site.replace(/[\*/:\?\.]/g, ""); // Drop */:?. characters from site for use in ID
 }
 
-function getAnchorNameForKey(site, key) {
+function getAnchorNameForKey(key) {
     for (var i = 1; i <= maxNumHotkeys; i++) {
-        var keyAry = config.get(keyField(site, i).split(" "));
+        var keyAry = config.get(keyField(i).split(" "));
         if (keyAry.includes(key)) {
-            return config.get(anchorNameField(site, i));
+            return config.get(anchorNameField(i));
         }
     }
 
     return "";
 }
-function getTextForKey(site, key) {
+function getTextForKey(key) {
     for (var i = 1; i <= maxNumHotkeys; i++) {
-        var keyAry = config.get(keyField(site, i).split(" "));
+        var keyAry = config.get(keyField(i).split(" "));
         if (keyAry.includes(key)) {
-            return config.get(textField(site, i));
+            return config.get(textField(i));
         }
     }
 
     return "";
 }
 
-// We use the site as part of these IDs so that the configuration is separate per site.
-function keyField(site, index) {
-    return site + "_Keys_" + index;
+function keyField(index) {
+    return "Keys_" + index;
 }
-function anchorNameField(site, index) {
-    return site + "_AnchorName_" + index;
+function anchorNameField(index) {
+    return "AnchorName_" + index;
 }
-function textField(site, index) {
-    return site + "_Text_" + index;
+function textField(index) {
+    return "Text_" + index;
 }
