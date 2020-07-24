@@ -37,6 +37,8 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
   * Slight tweak in how we store settings - any sites that contain periods (.) or question marks (?) will appear to lose their config - you can find the config in storage if needed.
 * 1.6 (6/5/20)
   * Further simplifying how we store settings - you'll need to recreate your hotkeys after this update (but your old config will still be in storage if needed).
+* 1.7 (7/24/20)
+  * Ignore keys for 2 seconds after the context menu is opened, to avoid catching right-click + letter actions (from my own external scripts).
 
 ---
 

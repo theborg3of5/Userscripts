@@ -3,8 +3,3 @@
 # Existing scripts
 	feedlyOpenInBackground
 		Can we get this working in Firefox, too?
-	jumpToText
-		Could we avoid this triggering when the right-click menu is open?
-			Maybe ignore keypresses for a second or two on right-click?
-			Is there some other way to tell if the right-click menu is open?
-			Context menu being opened -> oncontextmenu event: https://www.w3schools.com/jsref/event_oncontextmenu.asp
