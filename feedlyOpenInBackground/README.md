@@ -4,6 +4,16 @@ NOTE: this only works for the collapsed-titles layout - see the linked extension
 
 ---
 
+#### Changelog
+* 1.0 (1/10/20)
+  * Initial release
+* 1.1 (1/14/20)
+  * Also support when current post is opened/expanded
+* 1.2 (7/24/20)
+  * Add Firefox support (different hotkey code)
+
+---
+
 Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/feedlyOpenInBackground)
 
 Available on [Greasy Fork](https://greasyfork.org/en/scripts/394974-feedly-open-in-background-tab) for easy installation.

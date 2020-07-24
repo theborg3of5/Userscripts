@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Feedly - Open in Background Tab
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.1
+// @version      1.2
 // @description  Open the currently-selected post in Feedly in a new background tab using the semicolon key. NOTE: this only works for the collapsed-titles layout - see the linked extension for more robust handling.
 // @author       Gavin Borg
 // @match        http*://feedly.com/*
@@ -13,15 +13,34 @@
 (function() {
     'use strict';
 
+    if(getHotkeyCode() == "") {
+        console.log("FeedlyOpenInBackground: failed to determine hotkey");
+        return;
+    }
+
     document.onkeyup = function(e) {
-        if (e.which == 186) { // Semicolon
+        //console.log("Caught key code: " + e.which + ", hotkey is key code: " + getHotkeyCode());
+        if (e.which == getHotkeyCode()) {
             var url = getURL();
             if(url) {
+                console.log(url);
                 GM_openInTab(url);
             }
         }
     };
 })();
+
+function getHotkeyCode() {
+    var userAgent = navigator.userAgent;
+    if(userAgent.includes("Chrome/")) {
+        return 186; // Semicolon in Chrome
+    }
+    if(userAgent.includes("Firefox/")) {
+        return 59; // Semicolon in Firefox
+    }
+
+    return "";
+}
 
 function getURL() {
     var selectors = [".entry.selected a.title", ".list-entries .selected a.title"]; // Selected entry - collapsed, expanded
