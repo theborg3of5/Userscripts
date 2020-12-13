@@ -1,43 +1,65 @@
 // ==UserScript==
-// @name         New Userscript
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @name         Export YouTube Subscriptions to RSS OPML
+// @namespace    https://github.com/theborg3of5/Userscripts/
+// @version      1.0
+// @description  Adds an export button to the subscriptions section of the sidebar, which generates an OPML file of RSS feeds for your subscriptions.
+// @author       Gavin Borg
 // @match        https://www.youtube.com/
-// @grant        none
 // ==/UserScript==
+
+function addButton() {
+    // Find the subscriptions section label
+    var sectionLabels = document.querySelectorAll("yt-formatted-string#guide-section-title");
+    var subscriptionLabel;
+    for(var i = 0; i < sectionLabels.length; i++) {
+        if(sectionLabels[i].innerHTML === "Subscriptions") {
+            subscriptionLabel = sectionLabels[i].parentElement;
+            break;
+        }
+    }
+
+    // Create and insert button
+    var button = document.createElement("button");
+    button.title = "Export subscriptions as OPML file for RSS readers. Make sure to expand subscriptions in sidebar first.";
+    button.innerHTML = "Export";
+    button.style.fontWeight = "bold";
+    button.style.float = "right";
+    button.style.marginBottom = "2px";
+    button.style.marginRight = "30px";
+    button.id = "exportOPMLButton";
+    button.addEventListener("click", exportSubscriptions);
+    subscriptionLabel.appendChild(button);
+}
 
 function exportSubscriptions() {
     var channels = [];
     var inChannels = false;
+	 var channelURLFragment = "www.youtube.com/channel/";
 
     var links = document.querySelectorAll("div#items a#endpoint[href]"); // Sidebar links
     for(var i = 0; i < links.length; i++) {
         var href = links[i].href;
         var title = links[i].getAttribute("title");
 
-        if(href.indexOf("www.youtube.com/channel/") > -1) { // Found our first channel
+        if(href.indexOf(channelURLFragment) > -1) { // Found our first channel
             inChannels = true;
         }
 
         if(inChannels) {
-            if(href.indexOf("www.youtube.com/channel/") === -1) { // Once we're in the channels block, any link that's not to a channel means we've exited it and are finished.
+            if(href.indexOf(channelURLFragment) === -1) { // Once we're in the channels block, any link that's not to a channel means we've exited it and are finished.
                 break;
             }
 
-            var channelId = href.substring(href.lastIndexOf("www.youtube.com/channel/") + "www.youtube.com/channel/".length, href.length);
+            var channelId = href.substring(href.lastIndexOf(channelURLFragment) + channelURLFragment.length, href.length);
             channels.push({"title":title, "id":channelId});
         }
     }
 
-    // Build XML for OPML file
+    // Build download link and click it
     var xml = buildXML(channels);
-
     var fileType = "text/plain";
     var blob = new Blob([xml], {type: fileType});
     var blobURL = window.URL.createObjectURL(blob);
-
     var filename = "youtubeSubscriptions.opml";
     var downloadLink = document.createElement("a");
     downloadLink.setAttribute("href", blobURL);
@@ -75,13 +97,12 @@ function buildXML(channels) {
     parentOutline.setAttribute("text", "YouTube Subscriptions")
     parentOutline.setAttribute("title", "YouTube Subscriptions")
 
-    var youtubeRSSPrefix = "https://www.youtube.com/feeds/videos.xml?channel_id=";
     for(var j = 0; j < channels.length; j++) {
         var outline = xmlDoc.createElement("outline");
         outline.setAttribute("type", "rss");
         outline.setAttribute("text", channels[j].title);
         outline.setAttribute("title", channels[j].title);
-        outline.setAttribute("xmlUrl", youtubeRSSPrefix + channels[j].id);
+        outline.setAttribute("xmlUrl", "https://www.youtube.com/feeds/videos.xml?channel_id=" + channels[j].id);
         parentOutline.appendChild(outline);
     }
 
@@ -92,30 +113,6 @@ function buildXML(channels) {
 
     var s = new XMLSerializer();
     return s.serializeToString(xmlDoc);
-}
-
-function addButton() {
-    // Find the subscriptions section label
-    var sectionLabels = document.querySelectorAll("yt-formatted-string#guide-section-title");
-    var subscriptionLabel;
-    for(var i = 0; i < sectionLabels.length; i++) {
-        if(sectionLabels[i].innerHTML === "Subscriptions") {
-            subscriptionLabel = sectionLabels[i].parentElement;
-            break;
-        }
-    }
-
-    // Create and insert button
-    var button = document.createElement("button");
-    button.title = "Export subscriptions as OPML file for RSS readers. Make sure to expand subscriptions in sidebar first.";
-    button.innerHTML = "Export";
-    button.style.fontWeight = "bold";
-    button.style.float = "right";
-    button.style.marginBottom = "2px";
-    button.style.marginRight = "30px";
-    button.id = "exportOPMLButton";
-    button.addEventListener("click", exportSubscriptions);
-    subscriptionLabel.appendChild(button);
 }
 
 window.onload = addButton;
