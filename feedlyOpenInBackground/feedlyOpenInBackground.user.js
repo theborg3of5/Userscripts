@@ -24,7 +24,8 @@
             var url = getURL();
             if(url) {
                 console.log(url);
-                GM_openInTab(url);
+                var options = {active:false, insert:false}; // tweaks to open tabs in background after all other tabs (check options object below)
+                GM_openInTab(url,options);
             }
         }
     };
