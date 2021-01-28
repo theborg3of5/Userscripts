@@ -24,7 +24,8 @@
             var url = getURL();
             if(url) {
                 console.log(url);
-                GM_openInTab(url);
+                var options = {active:false, insert:false}; // tweaks to open tabs in background after all other tabs (check options object below)
+                GM_openInTab(url,options);
             }
         }
     };
@@ -43,7 +44,14 @@ function getHotkeyCode() {
 }
 
 function getURL() {
-    var selectors = [".entry.selected a.title", ".list-entries .selected a.title"]; // Selected entry - collapsed, expanded
+    var selectors = [
+		'.list-entries .entry--selected a.entry__title',     // Additional selector for recent Feedly changes
+		'div.selectedEntry a.title',			// title bar for active entry, collapsed or expanded
+		'.selectedEntry a.visitWebsiteButton',	// the button square button on list view
+		'.list-entries .inlineFrame--selected a.visitWebsiteButton',	// the button square button on list view
+		'a.visitWebsiteButton',					// the floating one for card view
+		'.entry.selected a.title'				// title bar for active entry in React-based collapsed list view
+    ];
     var link;
 
     for(var selector of selectors) {
