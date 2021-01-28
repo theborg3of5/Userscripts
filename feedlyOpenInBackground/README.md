@@ -11,6 +11,9 @@ NOTE: this only works for the collapsed-titles layout - see the linked extension
   * Also support when current post is opened/expanded
 * 1.2 (7/24/20)
   * Add Firefox support (different hotkey code)
+* 1.3 (1/28/21)
+  * Update selectors to fix for Feedly updates (thanks, njascgil!)
+  * Tabs now open at end of list instead of right next to the feedly tab in reverse order (thanks, njascgil!)
 
 ---
 

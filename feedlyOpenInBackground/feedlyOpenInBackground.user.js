@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Feedly - Open in Background Tab
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.2
+// @version      1.3
 // @description  Open the currently-selected post in Feedly in a new background tab using the semicolon key. NOTE: this only works for the collapsed-titles layout - see the linked extension for more robust handling.
 // @author       Gavin Borg
 // @match        http*://feedly.com/*
