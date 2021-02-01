@@ -10,6 +10,8 @@ This script adds an export button to the subscription section of the youtube sid
 #### Changelog
 * 1.0 (12/12/20)
   * Initial release
+* 1.1 (1/31/21)
+  * Fix issue with slightly-differently-formatted links in sidebar
 
 ---
 

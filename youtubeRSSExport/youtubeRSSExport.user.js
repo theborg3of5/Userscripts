@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.0
+// @version      1.1
 // @description  Adds an export button to the subscriptions section of the sidebar, which generates an OPML file of RSS feeds for your subscriptions.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/
@@ -51,6 +51,9 @@ function exportSubscriptions() {
             }
 
             var channelId = href.substring(href.lastIndexOf(channelURLFragment) + channelURLFragment.length, href.length);
+            if(channelId.indexOf("/") > -1) {
+                channelId = channelId.substring(0, channelId.indexOf("/")) // Sometimes the link doesn't end with the ID, but with other stuff like "/videos" - trim that off.
+            }
             channels.push({"title":title, "id":channelId});
         }
     }
