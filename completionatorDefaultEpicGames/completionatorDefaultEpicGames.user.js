@@ -14,4 +14,4 @@ document.querySelector("#rdoDigital").click(); // Format = Digital, click instea
 // The above fields show and populate the format dropdown
 window.setTimeout(function() {
     document.querySelector("#ddlDigitalFormatProvider").value = 1028; // Digital Format = Epic Games Store
-}, 2000);
+}, 1000);
