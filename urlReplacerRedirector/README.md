@@ -36,6 +36,6 @@ The script will redirect `https://www.google.com/BIT/1/asdf` to `https://www.goo
 
 ---
 
-Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/urlReplacerRedirector)
+Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/urlReplacerRedirector ). Please direct all issues/questions there.
 
-Available on [Greasy Fork](https://greasyfork.org/en/scripts/403100-url-replacer-redirector) for easy installation.
+Available on [Greasy Fork](https://greasyfork.org/en/scripts/403100-url-replacer-redirector ) for easy installation.

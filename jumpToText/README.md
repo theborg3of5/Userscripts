@@ -42,6 +42,6 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
 
 ---
 
-Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/jumpToText)
+Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/jumpToText ). Please direct all issues/questions there.
 
-Available on [Greasy Fork](https://greasyfork.org/en/scripts/395551-jump-to-text) for easy installation.
+Available on [Greasy Fork](https://greasyfork.org/en/scripts/395551-jump-to-text ) for easy installation.

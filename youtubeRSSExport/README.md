@@ -17,6 +17,6 @@ This script adds an export button to the subscription section of the youtube sid
 
 ---
 
-Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/youtubeRSSExport)
+Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/youtubeRSSExport ). Please direct all issues/questions there.
 
 Available on [Greasy Fork](https://greasyfork.org/en/scripts/418574-export-youtube-subscriptions-to-rss-opml ) for easy installation.

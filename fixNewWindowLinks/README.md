@@ -22,6 +22,6 @@ After that, the links you've specified should always open in the same tab/window
 
 ---
 
-Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/fixNewWindowLinks)
+Source: [GitHub](https://github.com/theborg3of5/Userscripts/tree/master/fixNewWindowLinks ). Please direct all issues/questions there.
 
-Available on [Greasy Fork](https://greasyfork.org/en/scripts/404695-fix-new-window-links-remove-target-attribute) for easy installation.
+Available on [Greasy Fork](https://greasyfork.org/en/scripts/404695-fix-new-window-links-remove-target-attribute ) for easy installation.
