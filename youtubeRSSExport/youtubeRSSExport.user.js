@@ -1,22 +1,14 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.1
+// @version      1.2
 // @description  Adds an export button to the subscriptions section of the sidebar, which generates an OPML file of RSS feeds for your subscriptions.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/
 // ==/UserScript==
 
 function addButton() {
-    // Find the subscriptions section label
-    var sectionLabels = document.querySelectorAll("yt-formatted-string#guide-section-title");
-    var subscriptionLabel;
-    for(var i = 0; i < sectionLabels.length; i++) {
-        if(sectionLabels[i].innerHTML === "Subscriptions") {
-            subscriptionLabel = sectionLabels[i].parentElement;
-            break;
-        }
-    }
+    var buttonParent = findSpotToPutButton();
 
     // Create and insert button
     var button = document.createElement("button");
@@ -28,13 +20,28 @@ function addButton() {
     button.style.marginRight = "30px";
     button.id = "exportOPMLButton";
     button.addEventListener("click", exportSubscriptions);
-    subscriptionLabel.appendChild(button);
+    buttonParent.appendChild(button);
+}
+
+function findSpotToPutButton() {
+    var sectionLabels = document.querySelectorAll("yt-formatted-string#guide-section-title");
+
+    // First try to find the "Subscriptions" section. Won't work outside of an en-US locale.
+    var subscriptionsText = "Subscriptions";
+    for(var i = 0; i < sectionLabels.length; i++) {
+        if(sectionLabels[i].innerHTML === subscriptionsText) {
+            return sectionLabels[i].parentElement;
+        }
+    }
+
+    // If that fails, just put it in the second section (first one's header is hidden).
+    return sectionLabels[1].parentElement;
 }
 
 function exportSubscriptions() {
     var channels = [];
     var inChannels = false;
-	 var channelURLFragment = "www.youtube.com/channel/";
+    var channelURLFragment = "www.youtube.com/channel/";
 
     var links = document.querySelectorAll("div#items a#endpoint[href]"); // Sidebar links
     for(var i = 0; i < links.length; i++) {

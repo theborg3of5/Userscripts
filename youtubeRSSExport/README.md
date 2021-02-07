@@ -12,6 +12,8 @@ This script adds an export button to the subscription section of the youtube sid
   * Initial release
 * 1.1 (1/31/21)
   * Fix issue with slightly-differently-formatted links in sidebar
+* 1.2 (2/6/21)
+  * Add a fallback method for figuring out where to put the button when we can't find a "Subscriptions" label (use the second section header).
 
 ---
 
