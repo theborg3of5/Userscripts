@@ -7,6 +7,8 @@ This script just defaults some values into the Completionator Bulk Import page, 
   * Initial release
 * 1.1 (2/12/21)
   * Update match URL to be a little more lenient and match more situations (namely a missing www.)
+* 1.2 (2/12/21)
+  * Check the "add to my backlog" checkbox as well.
 
 ---
 
