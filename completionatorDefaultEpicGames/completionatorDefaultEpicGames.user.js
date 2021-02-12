@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Completionator - Default Epic Games
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.0
+// @version      1.1
 // @description  Default values into the Completionator bulk import form, for weekly free Epic Games Store games.
 // @author       Gavin Borg
-// @match        https://www.completionator.com/Collection/BulkImport
+// @match        https://*.completionator.com/Collection/BulkImport
 // ==/UserScript==
 
 document.querySelector("#ddlPlatform").value = 32; // Platform = PC / Windows

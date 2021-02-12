@@ -5,6 +5,8 @@ This script just defaults some values into the Completionator Bulk Import page, 
 #### Changelog
 * 1.0 (2/7/21)
   * Initial release
+* 1.1 (2/12/21)
+  * Update match URL to be a little more lenient and match more situations (namely a missing www.)
 
 ---
 
