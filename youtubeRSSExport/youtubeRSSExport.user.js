@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.2
+// @version      1.3
 // @description  Adds an export button to the subscriptions section of the sidebar, which generates an OPML file of RSS feeds for your subscriptions.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/
@@ -15,7 +15,6 @@ function addButton() {
     button.title = "Export subscriptions as OPML file for RSS readers. Make sure to expand subscriptions in sidebar first.";
     button.innerHTML = "Export";
     button.style.fontWeight = "bold";
-    button.style.float = "right";
     button.style.marginBottom = "2px";
     button.style.marginRight = "30px";
     button.id = "exportOPMLButton";
