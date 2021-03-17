@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         URL Replacer/Redirector
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.0
+// @version      1.1
 // @description  Redirect specific sites by replacing part of the URL.
 // @author       Gavin Borg
 // @match        https://greasyfork.org/en/scripts/403100-url-replacer-redirector
@@ -31,6 +31,9 @@
         var toReplace = replacePrefix + key + replaceSuffix;
         var replaceWith = replacePrefix + replaceAry[key] + replaceSuffix;
 
+        // Use a RegEx to allow case-insensitive matching
+        toReplace = new RegExp(escapeRegex(toReplace), "i");
+
         newURL = newURL.replace(toReplace, replaceWith);
     }
 //     console.table({"Original URL":window.location.href, "New URL":newURL});
@@ -39,3 +42,8 @@
         window.location.replace(newURL);
     }
 })();
+
+// From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+function escapeRegex(string) {
+    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}

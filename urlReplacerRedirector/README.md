@@ -33,6 +33,8 @@ The script will redirect `https://www.google.com/BIT/1/asdf` to `https://www.goo
 #### Changelog
 * 1.0 (5/11/20)
   * Initial release
+* 1.1 (3/17/21)
+  * Make URL matching case-insensitive
 
 ---
 
