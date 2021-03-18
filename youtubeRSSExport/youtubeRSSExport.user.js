@@ -1,41 +1,12 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.3
-// @description  Adds an export button to the subscriptions section of the sidebar, which generates an OPML file of RSS feeds for your subscriptions.
+// @version      1.4
+// @description  Adds the option to export subscriptions from YouTube as an OPML file of RSS feeds.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/
+// @grant        GM_registerMenuCommand
 // ==/UserScript==
-
-function addButton() {
-    var buttonParent = findSpotToPutButton();
-
-    // Create and insert button
-    var button = document.createElement("button");
-    button.title = "Export subscriptions as OPML file for RSS readers. Make sure to expand subscriptions in sidebar first.";
-    button.innerHTML = "Export";
-    button.style.fontWeight = "bold";
-    button.style.marginBottom = "2px";
-    button.style.marginRight = "30px";
-    button.id = "exportOPMLButton";
-    button.addEventListener("click", exportSubscriptions);
-    buttonParent.appendChild(button);
-}
-
-function findSpotToPutButton() {
-    var sectionLabels = document.querySelectorAll("yt-formatted-string#guide-section-title");
-
-    // First try to find the "Subscriptions" section. Won't work outside of an en-US locale.
-    var subscriptionsText = "Subscriptions";
-    for(var i = 0; i < sectionLabels.length; i++) {
-        if(sectionLabels[i].innerHTML === subscriptionsText) {
-            return sectionLabels[i].parentElement;
-        }
-    }
-
-    // If that fails, just put it in the second section (first one's header is hidden).
-    return sectionLabels[1].parentElement;
-}
 
 function exportSubscriptions() {
     var channels = [];
@@ -124,4 +95,4 @@ function buildXML(channels) {
     return s.serializeToString(xmlDoc);
 }
 
-window.onload = addButton;
+GM_registerMenuCommand("Export YouTube Subscriptions to OPML", exportSubscriptions, "x");

@@ -18,6 +18,8 @@ This script adds an export button to the subscription section of the youtube sid
   * Add a fallback method for figuring out where to put the button when we can't find a "Subscriptions" label (use the second section header).
 * 1.3 (3/3/21)
   * Reduce styling around button so it stays outside of the first subscription's click target.
+* 1.4 (3/18/21)
+  * Move option into the extension (Tampermonkey, Greasemonkey, etc.) menu instead of trying to add a button to YouTube's ever-variable layout.
 
 ---
 
