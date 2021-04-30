@@ -21,6 +21,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Reduce styling around button so it stays outside of the first subscription's click target.
 * 1.4 (3/18/21)
   * Move option into the extension (Tampermonkey, Greasemonkey, etc.) menu instead of trying to add a button to YouTube's ever-variable layout.
+* 1.5 (4/30/21)
+  * Relax requirements for finding subscriptions slightly - now anything with "/channel/" in it (except studio.youtube.com links) should be found.
 
 ---
 
