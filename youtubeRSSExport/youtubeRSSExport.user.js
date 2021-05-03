@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.5
+// @version      1.6
 // @description  Adds the option to export subscriptions from YouTube as an OPML file of RSS feeds.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/
 // @grant        GM_registerMenuCommand
+// @grant        GM.registerMenuCommand
 // ==/UserScript==
 
 function exportSubscriptions() {
@@ -113,4 +114,10 @@ function buildXML(channels) {
    return s.serializeToString(xmlDoc);
 }
 
-GM_registerMenuCommand("Export YouTube Subscriptions to OPML", exportSubscriptions, "x");
+// Support both Greasemonkey and others (Greasemonkey check must come first because it can't handle checking if GM_registerMenuCommand exists without crashing)
+if(GM.registerMenuCommand) {
+    GM.registerMenuCommand("Export YouTube Subscriptions to OPML", exportSubscriptions, "x");
+}
+else {
+    GM_registerMenuCommand("Export YouTube Subscriptions to OPML", exportSubscriptions, "x");
+}

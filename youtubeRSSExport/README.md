@@ -23,6 +23,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Move option into the extension (Tampermonkey, Greasemonkey, etc.) menu instead of trying to add a button to YouTube's ever-variable layout.
 * 1.5 (4/30/21)
   * Relax requirements for finding subscriptions slightly - now anything with "/channel/" in it (except studio.youtube.com links) should be found.
+* 1.6 (5/3/21)
+  * Better support Greasemonkey by trying GM.registerMenuCommand before GM_registerMenuCommand.
 
 ---
 
