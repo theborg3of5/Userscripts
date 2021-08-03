@@ -4,7 +4,7 @@
 // @version      1.6
 // @description  Adds the option to export subscriptions from YouTube as an OPML file of RSS feeds.
 // @author       Gavin Borg
-// @match        https://www.youtube.com/
+// @match        https://www.youtube.com/*
 // @grant        GM_registerMenuCommand
 // @grant        GM.registerMenuCommand
 // ==/UserScript==
