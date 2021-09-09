@@ -25,6 +25,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Relax requirements for finding subscriptions slightly - now anything with "/channel/" in it (except studio.youtube.com links) should be found.
 * 1.6 (5/3/21)
   * Better support Greasemonkey by trying GM.registerMenuCommand before GM_registerMenuCommand.
+* 1.7 (9/9/21)
+  * Update how we find channel IDs to support new sidebar link format (thanks bcc32!)
 
 ---
 
