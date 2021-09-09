@@ -19,7 +19,7 @@ function exportSubscriptions() {
       var href = links[i].href;
       var title = links[i].getAttribute("title");
 
-         var channelId = getChannelId(href);
+         var channelId = getChannelId(links[i]);
          if(channelId) {
             inChannels = true; // Found our first channel
          }
@@ -46,25 +46,13 @@ function exportSubscriptions() {
    downloadLink.click();
 }
 
-function getChannelId(url) {
-   var channelURLFragment = "/channel/";
-
-   // Not a channel URL
-   if(url.indexOf(channelURLFragment) === -1) {
-      return "";
+function getChannelId(link) {
+   try {
+      if (link.data.browseEndpoint.browseId.startsWith("UC")) {
+         return link.data.browseEndpoint.browseId;
+      }
+   } catch {
    }
-   if(url.indexOf("studio.youtube.com") > -1) { // "studio" URLs are typically the user's own videos (and not a subscription)
-      return "";
-   }
-
-   var channelId = url.substring(url.lastIndexOf(channelURLFragment) + channelURLFragment.length, url.length);
-
-   // Sometimes the link doesn't end with the ID, but with other stuff like "/videos" - trim that off.
-   if(channelId.indexOf("/") > -1) {
-      return channelId.substring(0, channelId.indexOf("/"))
-   }
-
-   return channelId;
 }
 
 function buildXML(channels) {
