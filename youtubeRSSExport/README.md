@@ -1,5 +1,7 @@
 This script adds an export button to the subscription section of the youtube sidebar, that generates an OPML file of RSS feeds for your subscriptions. The OPML file can be imported into RSS readers to track your subscriptions as RSS feeds.
 
+NOTE: this does not currently work with Greasemonkey, for reasons I've yet to determine. I'd recommend you use Tampermonkey instead (at least for this script) in the meantime.
+
 ### How to Use
 1. Load a youtube "home" page (something that has the subscriptions list in the sidebar on the left).
 2. Expand the list of subscriptions in the sidebar (click the "Show X More" button) - the script can only include feeds for channels that appear in the sidebar.
