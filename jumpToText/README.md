@@ -39,6 +39,8 @@ This script adds customizable, one-button hotkeys to any site for jumping to anc
   * Further simplifying how we store settings - you'll need to recreate your hotkeys after this update (but your old config will still be in storage if needed).
 * 1.7 (7/24/20)
   * Ignore keys for 2 seconds after the context menu is opened, to avoid catching right-click + letter actions (from my own external scripts).
+* 1.8 (10/12/22)
+  * Fix error when trying to jump to text (not anchors) by passing a second argument to document.evaluate().
 
 ---
 

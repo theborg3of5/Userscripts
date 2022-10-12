@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Jump to Text
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.7
+// @version      1.8
 // @description  Adds single-key hotkeys that jump to specific text (or anchors) on a page.
 // @author       Gavin Borg
 // @require      https://greasyfork.org/scripts/28536-gm-config/code/GM_config.js?version=184529
@@ -131,7 +131,7 @@ function keyPressed(e) {
     var text = getTextForKey(e.key);
     //console.log("Text found: " + text);
     if(text !== "") {
-        var firstElement = document.evaluate("//*[contains(text(), '" + text + "')]").iterateNext();
+        var firstElement = document.evaluate("//*[contains(text(), '" + text + "')]", document).iterateNext();
         if(firstElement) {
             firstElement.scrollIntoView();
             return;
