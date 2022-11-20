@@ -29,6 +29,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Better support Greasemonkey by trying GM.registerMenuCommand before GM_registerMenuCommand.
 * 1.7 (9/9/21)
   * Update how we find channel IDs to support new sidebar link format (thanks bcc32!)
+* 1.8 (11/20/22)
+  * Switch to using the manage subscriptions page instead of the sidebar, as that loads everything up front and seems more stable.
 
 ---
 
