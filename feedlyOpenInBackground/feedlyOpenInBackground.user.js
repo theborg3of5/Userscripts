@@ -44,6 +44,7 @@ function getHotkeyCode() {
 }
 
 function getURL() {
+    /*
     var selectors = [
 		'.list-entries .entry--selected a.entry__title',     // Additional selector for recent Feedly changes
 		'div.selectedEntry a.title',			// title bar for active entry, collapsed or expanded
@@ -52,6 +53,8 @@ function getURL() {
 		'a.visitWebsiteButton',					// the floating one for card view
 		'.entry.selected a.title'				// title bar for active entry in React-based collapsed list view
     ];
+    */
+    var selectors = ['#EntryTitleLink-selected','a.Article__title'];
     var link;
 
     for(var selector of selectors) {
