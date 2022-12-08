@@ -1,12 +1,9 @@
-This script adds an export button to the subscription section of the youtube sidebar, that generates an OPML file of RSS feeds for your subscriptions. The OPML file can be imported into RSS readers to track your subscriptions as RSS feeds.
-
-NOTE: this does not currently work with Greasemonkey, for reasons I've yet to determine. I'd recommend you use Tampermonkey instead (at least for this script) in the meantime.
+This script generates an OPML file of RSS feeds for your subscriptions. The OPML file can be imported into RSS readers to track your subscriptions as RSS feeds.
 
 ### How to Use
-1. Load a youtube "home" page (something that has the subscriptions list in the sidebar on the left).
-2. Expand the list of subscriptions in the sidebar (click the "Show X More" button) - the script can only include feeds for channels that appear in the sidebar.
-3. Click the extension option to download your OPML file.
-4. Import it in the RSS reader of your choice.
+1. Navigate to your [manage subscriptions page](https://www.youtube.com/feed/channels).
+2. Click the extension option to download your OPML file.
+3. Import it in the RSS reader of your choice.
 
 If you get an invalid OPML file or are missing subscriptions that you expect, please include your subscription sidebar's HTML in your GitHub issue, as I've no way to tell what YouTube is serving any given user/browser/operating system.
 
@@ -29,6 +26,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Better support Greasemonkey by trying GM.registerMenuCommand before GM_registerMenuCommand.
 * 1.7 (9/9/21)
   * Update how we find channel IDs to support new sidebar link format (thanks bcc32!)
+* 1.8 (11/20/22)
+  * Switch to using the manage subscriptions page instead of the sidebar, as that loads everything up front and seems more stable.
 
 ---
 
