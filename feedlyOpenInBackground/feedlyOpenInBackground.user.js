@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Feedly - Open in Background Tab
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.3
-// @description  Open the currently-selected post in Feedly in a new background tab using the semicolon key. NOTE: this only works for the collapsed-titles layout - see the linked extension for more robust handling.
+// @version      1.4
+// @description  Open the currently-selected post in Feedly in a new background tab using the semicolon key. NOTE: this does not work for all layouts - see the linked extension for more robust handling.
 // @author       Gavin Borg
 // @match        http*://feedly.com/*
 // @grant        GM_openInTab
@@ -45,13 +45,11 @@ function getHotkeyCode() {
 
 function getURL() {
     var selectors = [
-		'.list-entries .entry--selected a.entry__title',     // Additional selector for recent Feedly changes
-		'div.selectedEntry a.title',			// title bar for active entry, collapsed or expanded
-		'.selectedEntry a.visitWebsiteButton',	// the button square button on list view
-		'.list-entries .inlineFrame--selected a.visitWebsiteButton',	// the button square button on list view
-		'a.visitWebsiteButton',					// the floating one for card view
-		'.entry.selected a.title'				// title bar for active entry in React-based collapsed list view
-    ];
+        '#EntryTitleLink-selected', // Title-Only, Magazine: collapsed entry
+        '.Article__title', // Title-Only: expanded entry
+        '.entry--selected' // Card view
+        // No good option for article view at this time :(
+    ]
     var link;
 
     for(var selector of selectors) {
