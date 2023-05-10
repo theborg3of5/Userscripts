@@ -54,7 +54,9 @@ function getURL() {
 		'.entry.selected a.title'				// title bar for active entry in React-based collapsed list view
     ];
     */
-    var selectors = ['#EntryTitleLink-selected','a.Article__title'];
+    //var selectors = ['#EntryTitleLink-selected','a.Article__title'];
+    var selectors = ['a.EntryTitleLink-selected','a.Article__title'];
+
     var link;
 
     for(var selector of selectors) {
