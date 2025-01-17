@@ -73,7 +73,14 @@ function buildXML(channels) {
 
    var head = xmlDoc.createElement("head");
    var title = xmlDoc.createElement("title");
-   title.innerHTML = "YouTube Subscriptions as RSS";
+
+   if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    window.trustedTypes.createPolicy('default', {
+        createHTML: (string, sink) => string
+    });
+   }
+   title.innerHTML = window.trustedTypes.defaultPolicy.createHTML("YouTube Subscriptions as RSS");
+   
    head.appendChild(title);
    opml.appendChild(head);
 
