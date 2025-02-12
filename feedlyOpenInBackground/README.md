@@ -19,6 +19,8 @@ NOTE: this only works for the collapsed-titles layout - see the linked extension
   * Article view no longer supported (no good way to identify the "selected" article, sorry!)
 * 1.5 (5/10/23)
   * Update selectors to fix for Feedly updates (thanks once again to njascgil!)
+* 1.6 (2/12/25)
+  * Update selectors to fix for Feedly updates
 
 ---
 
