@@ -30,6 +30,8 @@ If you get an invalid OPML file or are missing subscriptions that you expect, pl
   * Switch to using the manage subscriptions page instead of the sidebar, as that loads everything up front and seems more stable.
 * 1.9 (1/30/25)
   * Fix TrustedHTML compatibility issue (so this script will work again in Chrome/Edge 83).
+* 1.10 (3/19/25)
+  * Fix TrustedHTML compatibility issue (so this script will work again in Firefox).
 
 ---
 

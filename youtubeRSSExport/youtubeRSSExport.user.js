@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Export YouTube Subscriptions to RSS OPML
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.9
+// @version      1.10
 // @description  Adds the option to export subscriptions from YouTube as an OPML file of RSS feeds.
 // @author       Gavin Borg
 // @match        https://www.youtube.com/feed/channels
@@ -75,12 +75,14 @@ function buildXML(channels) {
    var title = xmlDoc.createElement("title");
 
    if (window.trustedTypes && window.trustedTypes.createPolicy) {
-    window.trustedTypes.createPolicy('default', {
-        createHTML: (string, sink) => string
-    });
+     window.trustedTypes.createPolicy('default', {
+       createHTML: (string, sink) => string
+     });
+     title.innerHTML = window.trustedTypes.defaultPolicy.createHTML("YouTube Subscriptions as RSS");
+   } else {
+     title.innerHTML = "YouTube Subscriptions as RSS";
    }
-   title.innerHTML = window.trustedTypes.defaultPolicy.createHTML("YouTube Subscriptions as RSS");
-   
+
    head.appendChild(title);
    opml.appendChild(head);
 
