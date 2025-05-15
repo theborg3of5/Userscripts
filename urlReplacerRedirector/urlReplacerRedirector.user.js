@@ -31,13 +31,14 @@
 // var config = GM_config;
 var Config;
 
-(function() {
+(function () 
+{
     'use strict';
 
-    const site = getMatchingSite();
-    console.log("Matching site: " + site); // gdbtodo probably won't need this eventually, just keeping in for debugging
-    initConfig();
-    
+    initConfig(); // Calls into doRedirect() once it's finished initializing
+
+    // doRedirect();
+
     return;
 
 
@@ -72,30 +73,11 @@ var Config;
     }
 })();
 
-function getMatchingSite() {
-    // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
-    var sites = GM_info.script.options.override.use_matches;
-    sites.concat(GM_info.script.options.override.use_includes);
-
-    // Find matching site
-    var currentURL = window.location.href;
-    for (var site of sites) {
-        // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those.
-        var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
-        if (siteRegex.test(currentURL)) {
-            return site; // First match always wins
-        }
-    }
-}
-
 function initConfig() {
     // var siteClean = cleanSite(site);
-    const configId = "URLReplacerRedirectorConfig";
-
     
     // Build config fields for each available site
     var fields = {};
-    var floatIDs = [];
     var sites = GM_info.script.options.override.use_matches;
     sites.concat(GM_info.script.options.override.use_includes);
     for (var site of sites)
@@ -135,10 +117,13 @@ function initConfig() {
     const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }";
 
     Config = new GM_config({
-        id: configId,
+        id: "URLReplacerRedirectorConfig",
         title: "URL Replacer/Redirector Config",
         fields: fields,
         css: styles,
+        events: {
+            init: doRedirect,
+        }
     });
 
     // Add a menu item to the menu to launch the config
@@ -147,40 +132,94 @@ function initConfig() {
     })
 }
 
-function cleanSite(site) { // gdbtodo is this worth keeping?
+// This gets called by initConfig() after the config is finished loading (because we use config 
+// values and need them loaded first).
+function doRedirect()
+{
+    const site = getMatchingSite();
+    console.log("Matching site: " + site);
+    if (!site)
+    {
+        console.log("URL Replacer/Redirector: no matching site found in config");
+        return;
+    }
+
+    // Retrieve config for the current site
+    const prefix             = Config.get(fieldPrefix(site));
+    const suffix             = Config.get(fieldSuffix(site));
+    const targetStrings      = Config.get(fieldTargetStrings(site)).split("\n");
+    const replacementStrings = Config.get(fieldReplacementStrings(site)).split("\n");
+    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings);
+
+    // Build the new URL
+    var newURL = window.location.href;
+    for (let i = 0; i < targetStrings.length; i++)
+    {
+        var toReplace = prefix + targetStrings[i] + suffix;
+        var replaceWith = prefix + replacementStrings[i] + suffix;
+
+        // Use a RegEx to allow case-insensitive matching
+        toReplace = new RegExp(escapeRegex(toReplace), "i");
+
+        newURL = newURL.replace(toReplace, replaceWith);
+    }
+    console.log("Original URL: " + window.location.href);
+    console.log("New URL: " + newURL);
+
+    // Redirect to the new URL
+    if (window.location.href !== newURL)
+    {
+        window.location.replace(newURL);
+    }
+}
+
+function getMatchingSite() {
+    // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
+    var sites = GM_info.script.options.override.use_matches;
+    sites.concat(GM_info.script.options.override.use_includes);
+
+    // Find matching site
+    var currentURL = window.location.href;
+    for (var site of sites)
+    {
+        // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those.
+        var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
+        if (siteRegex.test(currentURL)) {
+            return site; // First match always wins
+        }
+    }
+}
+
+function cleanSite(site) // gdbtodo is this worth keeping?
+{
     return site.replace(/[\*/:\?\.]/g, ""); // Drop */:?. characters from site for use in ID
 }
 
 // From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
-function escapeRegex(string) { // gdbtodo only keep this if I actually end up needing it
+function escapeRegex(string)
+{
     return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-// gdbtodo example of how to get values from the config
-// function getAnchorNameForKey(key) {
-//     for (var i = 1; i <= maxNumHotkeys; i++) {
-//         var keyAry = Config.get(keyField(i).split(" "));
-//         if (keyAry.includes(key)) {
-//             return Config.get(anchorNameField(i));
-//         }
-//     }
-
-//     return "";
-// }
-
-//gdbtodo put these in a region probably
-function fieldSection(site) {
+//#region Field name "constants" based on their corresponding sites
+function fieldSection(site) 
+{
     return "Section_" + site;
 }
-function fieldPrefix(site) {
+function fieldPrefix(site) 
+{
     return "Prefix_" + site;
 }
-function fieldSuffix(site) {
+function fieldSuffix(site) 
+{
     return "Suffix_" + site;
 }
-function fieldTargetStrings(site) {
+function fieldTargetStrings(site)
+{
     return "TargetString_" + site;
 }
-function fieldReplacementStrings(site) {
+function fieldReplacementStrings(site) 
+{
     return "ReplacementString_" + site;
 }
+//#endregion Field name "constants" based on their corresponding sites
