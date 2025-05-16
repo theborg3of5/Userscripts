@@ -22,14 +22,14 @@
 //gdbtodo consider defaulting prefix to matched site?
 
 //gdbtodo dropping support for included sites, only matched sites are allowed - need to document that thoroughly
+//           ...or do I need to add it back in? I was supporting includes before...
 
 //gdbtodo new idea for config handling: use the greasy fork page and/or the github page to host the config
 //         - That way there's always a reliable spot they can go to
 //         - Just make the config available via menu on any included/matched site
 //         - Include a "delete redirects for this site" button at the site level
 
-// var config = GM_config;
-var Config; // This will be our GM_config instance
+var Config = new GM_config({});
 
 (async function ()
 {
@@ -38,9 +38,9 @@ var Config; // This will be our GM_config instance
     // loadConfig(); // Calls into doRedirect() once it's finished initializing
     await initConfig();
 
-    console.log("First suffix: " + Config.get(fieldSuffix(GM_info.script.options.override.use_matches[0])));
+    console.log("First prefix: " + Config.get(fieldPrefix(GM_info.script.options.override.use_matches[0])));
 
-    // doRedirect();
+    doRedirect();
 
     return;
 
@@ -61,45 +61,23 @@ var Config; // This will be our GM_config instance
 
 })();
 
-function loadConfig()
-{
-    // Add a menu item to the menu to launch the config
-    GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
-
-    // Build config fields for each available site
-    var fields = buildConfigFields();
-
-    // Float the target strings fields to the left so that they can line up with their corresponding replacements
-    const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
-
-    Config = new GM_config({
-        id: "URLReplacerRedirectorConfig",
-        title: "URL Replacer/Redirector Config",
-        fields: fields,
-        css: styles,
-        events: {
-            init: doRedirect,
-        }
-    });
-}
-
 async function initConfig()
 { 
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
 
-    return new Promise((resolve, reject) =>
+    // Wrap the initialization in a promise so we can await for it (because we need the values it
+    // loads to do any redirects)
+    return new Promise((resolve) =>
     {
-        // Build config fields for each available site
-        var fields = buildConfigFields();
-
-        // Float the target strings fields to the left so that they can line up with their corresponding replacements
+        // Float the target strings fields to the left so that they can line up with their
+        // corresponding replacements
         const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
 
-        Config = new GM_config({
+        Config.init({
             id: "URLReplacerRedirectorConfig",
             title: "URL Replacer/Redirector Config",
-            fields: fields,
+            fields: buildSiteFields(),
             css: styles,
             events: {
                 init: resolve,
@@ -108,11 +86,10 @@ async function initConfig()
     });
 }
 
-function buildConfigFields()
+function buildSiteFields()
 { 
     var fields = {};
-    const sites = GM_info.script.options.override.use_matches;
-    for (var site of sites)
+    for (var site of getMatchSites())
     {
         fields[fieldSection(site)] = {
             type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
@@ -124,7 +101,6 @@ function buildConfigFields()
             labelPos: "left",
             // size: gdbtodo,
             title: "gdbdoc",
-            default: Config?.get(fieldPrefix(site)),
         }
         fields[fieldSuffix(site)] = {
             type: "text",
@@ -168,8 +144,12 @@ function buildConfigFields()
     return fields;
 }
 
-// This gets called by initConfig() after the config is finished loading (because we use config
-// values and need them loaded first).
+//gdbdoc talk about how we only support USER matched sites, not included sites (assuming we don't revert that bit)
+function getMatchSites()
+{ 
+    return GM_info.script.options.override.use_matches;
+}
+
 function doRedirect()
 {
     const site = getMatchingSite();
@@ -211,7 +191,7 @@ function doRedirect()
 
 function getMatchingSite() {
     // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
-    const sites = GM_info.script.options.override.use_matches; // gdbtodo figure out how to eliminate this overlap if possible? If worth it?
+    // const sites = GM_info.script.options.override.use_matches; // gdbtodo figure out how to eliminate this overlap if possible? If worth it?
     // const sites = GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
     // console.log("Matches: " + GM_info.script.options.override.use_matches);
     // console.log("Includes: " + GM_info.script.options.override.use_includes);
@@ -219,7 +199,7 @@ function getMatchingSite() {
 
     // Find matching site
     var currentURL = window.location.href;
-    for (var site of sites)
+    for (var site of getMatchSites())
     {
         // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those.
         var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
