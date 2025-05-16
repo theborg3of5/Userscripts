@@ -31,11 +31,14 @@
 // var config = GM_config;
 var Config; // This will be our GM_config instance
 
-(function ()
+(async function ()
 {
     'use strict';
 
-    loadConfig(); // Calls into doRedirect() once it's finished initializing
+    // loadConfig(); // Calls into doRedirect() once it's finished initializing
+    await initConfig();
+
+    console.log("First suffix: " + Config.get(fieldSuffix(GM_info.script.options.override.use_matches[0])));
 
     // doRedirect();
 
@@ -77,6 +80,31 @@ function loadConfig()
         events: {
             init: doRedirect,
         }
+    });
+}
+
+async function initConfig()
+{ 
+    // Add a menu item to the menu to launch the config
+    GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
+
+    return new Promise((resolve, reject) =>
+    {
+        // Build config fields for each available site
+        var fields = buildConfigFields();
+
+        // Float the target strings fields to the left so that they can line up with their corresponding replacements
+        const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
+
+        Config = new GM_config({
+            id: "URLReplacerRedirectorConfig",
+            title: "URL Replacer/Redirector Config",
+            fields: fields,
+            css: styles,
+            events: {
+                init: resolve,
+            }
+        });
     });
 }
 
