@@ -18,9 +18,6 @@
 //gdbtodo figure out a conversion from old to new settings style?
 //         - Should basically be able to load the old settings, add them to the GM_config fields, and save it, right? Or do I need a new reload or something then?
 
-//gdbtodo dropping support for included sites, only matched sites are allowed - need to document that thoroughly
-//           ...or do I need to add it back in? I was supporting includes before...
-
 //gdbtodo new idea for config handling: use the greasy fork page and/or the github page to host the config
 //         - That way there's always a reliable spot they can go to
 //         - Just make the config available via menu on any included/matched site
@@ -81,10 +78,10 @@ var Config = new GM_config();
 
 })();
 
-//gdbdoc talk about how we only support USER matched sites, not the default ones (and not user included sites, assuming we don't revert that bit)
+// We support both includes and matches, but only the user-overridden ones of each.
 function getUserSites()
 { 
-    return GM_info.script.options.override.use_matches;
+    return GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
 }
 
 // Build the settings object for GM_config.init()
@@ -105,7 +102,7 @@ function buildConfigSettings()
     };
 }
 
-//gdbdoc
+// Build the specific fields in the config
 function buildSiteFields()
 { 
     var fields = {};
@@ -119,35 +116,32 @@ function buildSiteFields()
             type: "text",
             label: "Prefix",
             labelPos: "left",
-            // size: gdbtodo,
+            size: 75,
             title: "gdbdoc",
         }
         fields[fieldSuffix(site)] = {
             type: "text",
             label: "Suffix",
             labelPos: "left",
-            // size: gdbtodo,
+            size: 75,
             title: "gdbdoc",
         }
         fields[fieldTargetStrings(site)] = {
             type: "textarea",
             label: "Strings to replace",
             labelPos: "above",
-            // size: gdbtodo,
             title: "gdbdoc",
         }
         fields[fieldReplacementStrings(site)] = {
             type: "textarea",
             label: "Replace with strings",
             labelPos: "above",
-            // size: gdbtodo,
             title: "gdbdoc",
         }
         fields[fieldClearSite(site)] = {
             type: "button",
             label: "Clear redirects for this site",
             title: "gdbdoc",
-            // size: gdbtodo,
             click: function (siteToClear)
             {
                 return () => {
@@ -200,8 +194,17 @@ function getUserSiteForURL(startURL)
 {
     for (var site of getUserSites())
     {
-        // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those. //gdbredoc
-        var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
+        // Use a RegExp so we check case-insensitively
+        var siteRegex = "";
+        if (site.startsWith("/"))
+        {
+            siteRegex = new RegExp(site.slice(1, -1), "i"); // If the site starts with a /, treat it as a regex (but remove the leading/trailing /)
+        }
+        else
+        {
+            siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*"), "i"); // Otherwise replace * wildcards with regex-style [^ ]* wildcards
+        }
+
         if (siteRegex.test(startURL)) {
             return site; // First match always wins
         }
