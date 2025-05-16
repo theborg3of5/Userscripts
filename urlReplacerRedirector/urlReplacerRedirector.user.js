@@ -17,9 +17,6 @@
 
 //gdbtodo figure out a conversion from old to new settings style?
 //         - Should basically be able to load the old settings, add them to the GM_config fields, and save it, right? Or do I need a new reload or something then?
-//gdbtodo figure out an escape hatch to remove redirect settings for a specific site
-//           Maybe a menu option? But that would require the target site to be on the include/match list too?
-//gdbtodo consider defaulting prefix to matched site?
 
 //gdbtodo dropping support for included sites, only matched sites are allowed - need to document that thoroughly
 //           ...or do I need to add it back in? I was supporting includes before...
@@ -28,50 +25,70 @@
 //         - That way there's always a reliable spot they can go to
 //         - Just make the config available via menu on any included/matched site
 //         - Include a "delete redirects for this site" button at the site level
+//         - When you're on an included page, consider highlighting it somehow (to make it easier when adding new redirects)
 
-var Config = new GM_config({});
+// Our configuration object - this loads/saves settings and handles the config popup.
+var Config = new GM_config();
 
 (async function ()
 {
     'use strict';
-
+    
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
-
-    // Load the config (await because we'll use that data to do the redirect)
-    await loadConfig();
-
-    const site = getMatchingSite();
-    console.log("Matching site: " + site); //gdbremove
     
-    if (!site)
+    // Set up and load config
+    let configSettings = buildConfigSettings();
+    await initConfigAsync(configSettings); // await because we need to read from these (async-loaded) values
+    console.log("First site's prefix: " + Config.get(fieldPrefix(getUserSites()[0]))); //gdbremove
+    
+    // Get replacement settings for the current URL
+    const startURL = window.location.href;
+    const replaceSettings = getSettingsForURL(startURL);
+    if (!replaceSettings)
     {
-        console.log("URL Replacer/Redirector: no settings found for matching site: " + site);
         return;
     }
-    doRedirect();
+    console.log("Site replacement settings: " + replaceSettings); //gdbremove
 
-    return;
-
-
-    // Initial creation of settings structure if it doesn't exist
-    if(!GM_getValue("replaceTheseStrings")) {
-        GM_setValue("replacePrefix", "");
-        GM_setValue("replaceSuffix", "");
-        GM_setValue("replaceTheseStrings", {"toReplace": "replaceWith"});
-        console.log("Created settings structure");
+    // Get new URL
+    const newURL = transformURL(startURL, replaceSettings);
+    console.log("Original URL: " + startURL + "\nNew URL: " + newURL); //gdbremove
+    
+    // Redirect to the new URL
+    if (startURL === newURL)
+    { 
+        console.log("URL Replacer/Redirector: current URL is same as redirection target: " + newURL);
+        return
     }
+    window.location.replace(newURL);
 
-    // Prefix/suffix apply to both sides
-    var replacePrefix = GM_getValue("replacePrefix");
-    var replaceSuffix = GM_getValue("replaceSuffix");
-    var replaceAry = GM_getValue("replaceTheseStrings");
-//     console.log(replacePrefix, replaceSuffix, replaceAry);
+
+
+//     // Initial creation of settings structure if it doesn't exist
+//     if(!GM_getValue("replaceTheseStrings")) {
+//         GM_setValue("replacePrefix", "");
+//         GM_setValue("replaceSuffix", "");
+//         GM_setValue("replaceTheseStrings", {"toReplace": "replaceWith"});
+//         console.log("Created settings structure");
+//     }
+
+//     // Prefix/suffix apply to both sides
+//     var replacePrefix = GM_getValue("replacePrefix");
+//     var replaceSuffix = GM_getValue("replaceSuffix");
+//     var replaceAry = GM_getValue("replaceTheseStrings");
+// //     console.log(replacePrefix, replaceSuffix, replaceAry);
 
 })();
 
-// This is basically a wrapper to let us await GM_config.init()
-async function loadConfig()
+//gdbdoc talk about how we only support USER matched sites, not the default ones (and not user included sites, assuming we don't revert that bit)
+function getUserSites()
+{ 
+    return GM_info.script.options.override.use_matches;
+}
+
+// Build the settings object for GM_config.init()
+function buildConfigSettings()
 {
     // Build fields for each site
     const fields = buildSiteFields();
@@ -80,30 +97,19 @@ async function loadConfig()
     // corresponding replacements
     const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
 
-    return await initConfig({
+    return {
         id: "URLReplacerRedirectorConfig",
         title: "URL Replacer/Redirector Config",
         fields: fields,
         css: styles,
-    });
+    };
 }
 
-// This is just a Promise wrapper that lets us await GM_config's initialization.
-async function initConfig(settings)
-{
-    return new Promise((resolve) =>
-    {
-        // Have the init event (which should fire once config is done loading) resolve the promise
-        settings["events"] = {init: resolve};
-
-        Config.init(settings);
-    });
-}
-
+//gdbdoc
 function buildSiteFields()
 { 
     var fields = {};
-    for (var site of getMatchSites())
+    for (var site of getUserSites())
     {
         fields[fieldSection(site)] = {
             type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
@@ -158,44 +164,58 @@ function buildSiteFields()
     return fields;
 }
 
-//gdbdoc talk about how we only support USER matched sites, not included sites (assuming we don't revert that bit)
-function getMatchSites() // gdbtodo should this just be a parameter passed around instead of a standalone function?
-{ 
-    return GM_info.script.options.override.use_matches;
+// This is just a Promise wrapper for GM_config.init that allows us to await initialization.
+async function initConfigAsync(settings)
+{
+    return new Promise((resolve) =>
+    {
+        // Have the init event (which should fire once config is done loading) resolve the promise
+        settings["events"] = {init: resolve};
+
+        Config.init(settings);
+    });
 }
 
-function getMatchingSite() {
-    // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
-    // const sites = GM_info.script.options.override.use_matches;
-    // const sites = GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
-    // console.log("Matches: " + GM_info.script.options.override.use_matches);
-    // console.log("Includes: " + GM_info.script.options.override.use_includes);
-    // console.log("Combined: " + sites);
-
-    // Find matching site
-    var currentURL = window.location.href;
-    for (var site of getMatchSites())
+function getSettingsForURL(startURL)
+{
+    // Find the site that we matched
+    const site = getUserSiteForURL(startURL);
+    if (!site)
     {
-        // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those.
+        console.log("No matching site found for URL: " + startURL);
+        return null;
+    }
+
+    // Retrieve and return the settings
+    return {
+        prefix:             Config.get(fieldPrefix(site)),
+        suffix:             Config.get(fieldSuffix(site)),
+        targetStrings:      Config.get(fieldTargetStrings(site)).split("\n"),
+        replacementStrings: Config.get(fieldReplacementStrings(site)).split("\n"),
+    }
+}
+
+//gdbdoc
+function getUserSiteForURL(startURL)
+{
+    for (var site of getUserSites())
+    {
+        // Use a RegExp to determine which of the user's includes/matches is currently open, since we allow different hotkeys/anchors per each of those. //gdbredoc
         var siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*")); // Replace * wildcards with regex-style [^ ]* wildcards
-        if (siteRegex.test(currentURL)) {
+        if (siteRegex.test(startURL)) {
             return site; // First match always wins
         }
     }
 }
 
-function doRedirect(site)
+//gdbdoc
+function transformURL(startURL, siteSettings)
 {
-
-    // Retrieve config for the current site
-    const prefix             = Config.get(fieldPrefix(site));
-    const suffix             = Config.get(fieldSuffix(site));
-    const targetStrings      = Config.get(fieldTargetStrings(site)).split("\n");
-    const replacementStrings = Config.get(fieldReplacementStrings(site)).split("\n");
+    const { prefix, suffix, targetStrings, replacementStrings } = siteSettings;
     console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings); //gdbremove
 
-    // Build the new URL
-    var newURL = window.location.href;
+    // Transform the URL
+    var newURL = startURL;
     for (let i = 0; i < targetStrings.length; i++)
     {
         var toReplace = prefix + targetStrings[i] + suffix;
@@ -206,24 +226,8 @@ function doRedirect(site)
 
         newURL = newURL.replace(toReplace, replaceWith);
     }
-    console.log("Original URL: " + window.location.href + "\nNew URL: " + newURL); //gdbremove
 
-    if (window.location.href !== newURL)
-    { 
-        console.log("URL Replacer/Redirector: current URL is same as redirection target: " + newURL);
-        return
-    }
-
-    // Redirect to the new URL
-    if (window.location.href !== newURL)
-    {
-        window.location.replace(newURL);
-    }
-}
-
-function cleanSite(site) // gdbtodo is this worth keeping?
-{
-    return site.replace(/[\*/:\?\.]/g, ""); // Drop */:?. characters from site for use in ID
+    return newURL;
 }
 
 // From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
