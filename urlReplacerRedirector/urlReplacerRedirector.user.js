@@ -13,15 +13,15 @@
 // @grant        GM.setValue
 // ==/UserScript==
 
-// GM_* are for legacy Greasemonkey, GM. is for modern (GM 4+ sounds like)
-
-//gdbtodo do I need GM.registerMenuCommand too?
+// Grant GM_*value for legacy Greasemonkey, GM.*value for Greasemonkey 4+
 
 //gdbtodo figure out a conversion from old to new settings style?
 //         - Should basically be able to load the old settings, add them to the GM_config fields, and save it, right? Or do I need a new reload or something then?
 //gdbtodo figure out an escape hatch to remove redirect settings for a specific site
 //           Maybe a menu option? But that would require the target site to be on the include/match list too?
 //gdbtodo consider defaulting prefix to matched site?
+
+//gdbtodo dropping support for included sites, only matched sites are allowed - need to document that thoroughly
 
 //gdbtodo new idea for config handling: use the greasy fork page and/or the github page to host the config
 //         - That way there's always a reliable spot they can go to
@@ -31,7 +31,7 @@
 // var config = GM_config;
 var Config;
 
-(function () 
+(function ()
 {
     'use strict';
 
@@ -56,59 +56,84 @@ var Config;
     var replaceAry = GM_getValue("replaceTheseStrings");
 //     console.log(replacePrefix, replaceSuffix, replaceAry);
 
-    var newURL = window.location.href;
-    for(var key in replaceAry) {
-        var toReplace = replacePrefix + key + replaceSuffix;
-        var replaceWith = replacePrefix + replaceAry[key] + replaceSuffix;
-
-        // Use a RegEx to allow case-insensitive matching
-        toReplace = new RegExp(escapeRegex(toReplace), "i");
-
-        newURL = newURL.replace(toReplace, replaceWith);
-    }
-//     console.table({"Original URL":window.location.href, "New URL":newURL});
-
-    if(window.location.href !== newURL) {
-        window.location.replace(newURL);
-    }
 })();
 
 function initConfig() {
     // var siteClean = cleanSite(site);
-    
+
     // Build config fields for each available site
     var fields = {};
-    var sites = GM_info.script.options.override.use_matches;
-    sites.concat(GM_info.script.options.override.use_includes);
+    const sites = GM_info.script.options.override.use_matches;
     for (var site of sites)
     {
         fields[fieldSection(site)] = {
-            section: site,
             type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
+            section: site,
         }
         fields[fieldPrefix(site)] = {
+            type: "text",
             label: "Prefix",
             labelPos: "left",
-            type: "text",
+            // size: 50,
             title: "gdbdoc",
         }
         fields[fieldSuffix(site)] = {
+            type: "text",
             label: "Suffix",
             labelPos: "left",
-            type: "text",
+            // size: 50,
             title: "gdbdoc",
         }
         fields[fieldTargetStrings(site)] = {
+            type: "textarea",
             label: "Strings to replace",
             labelPos: "above",
-            type: "textarea",
+            // size: 50,
             title: "gdbdoc",
         }
         fields[fieldReplacementStrings(site)] = {
+            type: "textarea",
             label: "Replace with strings",
             labelPos: "above",
-            type: "textarea",
+            // size: 50,
             title: "gdbdoc",
+        }
+        fields[fieldClearSite(site)] = {
+            type: "button",
+            label: "Clear redirects for this site",
+            title: "gdbdoc",
+            // size: 50,
+            // click: function ()
+            // { 
+            //     return function (siteURL)
+            // },
+            // click: clearHandler(site),
+            click: function (siteToClear)
+            {
+                return () => {
+                    console.log("Clearing redirects for site: " + siteToClear);
+                    Config.set(fieldPrefix(siteToClear), "");
+                    Config.set(fieldSuffix(siteToClear), "");
+                    Config.set(fieldTargetStrings(siteToClear), "");
+                    Config.set(fieldReplacementStrings(siteToClear), "");
+                }
+            }(site), // Immediately invoke this wrapper with the current site so the inner function can capture it
+            // click: function(siteToClear) {
+            //     return function () // Extra function gdbdoc
+            //     {
+            //         console.log("Clearing redirects for site: " + siteToClear);
+            //         // Config.set(fieldPrefix(siteToClear), "");
+            //         // Config.set(fieldSuffix(siteToClear), "");
+            //         // Config.set(fieldTargetStrings(siteToClear), "");
+            //         // Config.set(fieldReplacementStrings(siteToClear), "");
+            //     }
+            // }(site),
+            // click: ((siteURL) => console.log("Clearing redirects for site: " + siteURL))(site),
+            // click: function() {
+            //     // Clear the fields for this site
+            //     // const site = this.id.replace("ClearSite_", ""); // Get the site name from the field ID
+            //     console.log("Clearing redirects for site: " + this);
+            // }.bind(site)
         }
     }
 
@@ -132,7 +157,15 @@ function initConfig() {
     })
 }
 
-// This gets called by initConfig() after the config is finished loading (because we use config 
+function clearHandler(site)
+{
+    return function ()
+    {
+        console.log("Clearing redirects for site: " + site)
+    }
+}
+
+// This gets called by initConfig() after the config is finished loading (because we use config
 // values and need them loaded first).
 function doRedirect()
 {
@@ -175,8 +208,11 @@ function doRedirect()
 
 function getMatchingSite() {
     // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
-    var sites = GM_info.script.options.override.use_matches;
-    sites.concat(GM_info.script.options.override.use_includes);
+    const sites = GM_info.script.options.override.use_matches; // gdbtodo figure out how to eliminate this overlap if possible? If worth it?
+    // const sites = GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
+    // console.log("Matches: " + GM_info.script.options.override.use_matches);
+    // console.log("Includes: " + GM_info.script.options.override.use_includes);
+    // console.log("Combined: " + sites);
 
     // Find matching site
     var currentURL = window.location.href;
@@ -198,19 +234,19 @@ function cleanSite(site) // gdbtodo is this worth keeping?
 // From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
 function escapeRegex(string)
 {
-    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    return string.replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
 }
 
 //#region Field name "constants" based on their corresponding sites
-function fieldSection(site) 
+function fieldSection(site)
 {
     return "Section_" + site;
 }
-function fieldPrefix(site) 
+function fieldPrefix(site)
 {
     return "Prefix_" + site;
 }
-function fieldSuffix(site) 
+function fieldSuffix(site)
 {
     return "Suffix_" + site;
 }
@@ -218,8 +254,12 @@ function fieldTargetStrings(site)
 {
     return "TargetString_" + site;
 }
-function fieldReplacementStrings(site) 
+function fieldReplacementStrings(site)
 {
     return "ReplacementString_" + site;
+}
+function fieldClearSite(site)
+{
+    return "ClearSite_" + site;
 }
 //#endregion Field name "constants" based on their corresponding sites
