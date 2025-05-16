@@ -29,14 +29,13 @@
 //         - Include a "delete redirects for this site" button at the site level
 
 // var config = GM_config;
-var Config;
-var Config2;
+var Config; // This will be our GM_config instance
 
 (function ()
 {
     'use strict';
 
-    initConfig(); // Calls into doRedirect() once it's finished initializing
+    loadConfig(); // Calls into doRedirect() once it's finished initializing
 
     // doRedirect();
 
@@ -59,68 +58,13 @@ var Config2;
 
 })();
 
-function initConfig()
+function loadConfig()
 {
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
 
-    // var siteClean = cleanSite(site);
-
     // Build config fields for each available site
-    var fields = buildFields();
-    // const sites = GM_info.script.options.override.use_matches;
-    // for (var site of sites)
-    // {
-    //     fields[fieldSection(site)] = {
-    //         type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
-    //         section: site,
-    //     }
-    //     fields[fieldPrefix(site)] = {
-    //         type: "text",
-    //         label: "Prefix",
-    //         labelPos: "left",
-    //         // size: gdbtodo,
-    //         title: "gdbdoc",
-    //         default: Config?.get(fieldPrefix(site)),
-    //     }
-    //     fields[fieldSuffix(site)] = {
-    //         type: "text",
-    //         label: "Suffix",
-    //         labelPos: "left",
-    //         // size: gdbtodo,
-    //         title: "gdbdoc",
-    //     }
-    //     fields[fieldTargetStrings(site)] = {
-    //         type: "textarea",
-    //         label: "Strings to replace",
-    //         labelPos: "above",
-    //         // size: gdbtodo,
-    //         title: "gdbdoc",
-    //     }
-    //     fields[fieldReplacementStrings(site)] = {
-    //         type: "textarea",
-    //         label: "Replace with strings",
-    //         labelPos: "above",
-    //         // size: gdbtodo,
-    //         title: "gdbdoc",
-    //     }
-    //     fields[fieldClearSite(site)] = {
-    //         type: "button",
-    //         label: "Clear redirects for this site",
-    //         title: "gdbdoc",
-    //         // size: gdbtodo,
-    //         click: function (siteToClear)
-    //         {
-    //             return () => {
-    //                 console.log("Clearing redirects for site: " + siteToClear);
-    //                 Config.set(fieldPrefix(siteToClear), "");
-    //                 Config.set(fieldSuffix(siteToClear), "");
-    //                 Config.set(fieldTargetStrings(siteToClear), "");
-    //                 Config.set(fieldReplacementStrings(siteToClear), "");
-    //             }
-    //         }(site), // Immediately invoke this wrapper with the current site so the inner function can capture it
-    //     }
-    // }
+    var fields = buildConfigFields();
 
     // Float the target strings fields to the left so that they can line up with their corresponding replacements
     const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
@@ -131,32 +75,12 @@ function initConfig()
         fields: fields,
         css: styles,
         events: {
-            init: middleInit,
-            // init: doRedirect,
-        }
-    });
-}
-
-function middleInit()
-{ 
-    var fields = buildFields();
-
-    // Float the target strings fields to the left so that they can line up with their corresponding replacements
-    const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
-
-    Config.init({
-        id: "URLReplacerRedirectorConfig",
-        title: "URL Replacer/Redirector Config",
-        fields: fields,
-        css: styles,
-        events: {
-            // init: middleInit,
             init: doRedirect,
         }
     });
 }
 
-function buildFields()
+function buildConfigFields()
 { 
     var fields = {};
     const sites = GM_info.script.options.override.use_matches;
