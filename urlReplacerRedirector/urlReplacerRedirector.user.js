@@ -117,31 +117,31 @@ function buildSiteFields()
             label: "Prefix",
             labelPos: "left",
             size: 75,
-            title: "gdbdoc",
+            title: "This string (if set) must appear directly before the target string in the URL.",
         }
         fields[fieldSuffix(site)] = {
             type: "text",
             label: "Suffix",
             labelPos: "left",
             size: 75,
-            title: "gdbdoc",
+            title: "This string (if set) must appear directly after the target string in the URL.",
         }
         fields[fieldTargetStrings(site)] = {
             type: "textarea",
-            label: "Strings to replace",
+            label: "Targets",
             labelPos: "above",
-            title: "gdbdoc",
+            title: "Enter one target per line. Each target will be replaced by its corresponding replacement.",
         }
         fields[fieldReplacementStrings(site)] = {
             type: "textarea",
-            label: "Replace with strings",
+            label: "Replacements",
             labelPos: "above",
-            title: "gdbdoc",
+            title: "Enter one replacement per line. Each replacement with replace its corresponding target.",
         }
         fields[fieldClearSite(site)] = {
             type: "button",
             label: "Clear redirects for this site",
-            title: "gdbdoc",
+            title: "Clear all fields for this site, removing all redirection.",
             click: function (siteToClear)
             {
                 return () => {
@@ -189,7 +189,7 @@ function getSettingsForURL(startURL)
     }
 }
 
-//gdbdoc
+// Get the site (entry from user includes/matches) that matches the current URL.
 function getUserSiteForURL(startURL)
 {
     for (var site of getUserSites())
@@ -211,7 +211,7 @@ function getUserSiteForURL(startURL)
     }
 }
 
-//gdbdoc
+// Do the replacements specified by the given settings.
 function transformURL(startURL, siteSettings)
 {
     const { prefix, suffix, targetStrings, replacementStrings } = siteSettings;
@@ -225,7 +225,7 @@ function transformURL(startURL, siteSettings)
         var replaceWith = prefix + replacementStrings[i] + suffix;
 
         // Use a RegEx to allow case-insensitive matching
-        toReplace = new RegExp(escapeRegex(toReplace), "i");
+        toReplace = new RegExp(escapeRegex(toReplace), "i"); // Escape any regex characters - we don't support actual regex matching.
 
         newURL = newURL.replace(toReplace, replaceWith);
     }
