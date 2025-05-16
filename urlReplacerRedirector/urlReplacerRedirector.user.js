@@ -35,11 +35,20 @@ var Config = new GM_config({});
 {
     'use strict';
 
-    // loadConfig(); // Calls into doRedirect() once it's finished initializing
-    await initConfig();
+    // Add a menu item to the menu to launch the config
+    GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
 
-    console.log("First prefix: " + Config.get(fieldPrefix(GM_info.script.options.override.use_matches[0])));
+    // Load the config (await because we'll use that data to do the redirect)
+    await loadConfig();
 
+    const site = getMatchingSite();
+    console.log("Matching site: " + site); //gdbremove
+    
+    if (!site)
+    {
+        console.log("URL Replacer/Redirector: no settings found for matching site: " + site);
+        return;
+    }
     doRedirect();
 
     return;
@@ -61,28 +70,33 @@ var Config = new GM_config({});
 
 })();
 
-async function initConfig()
-{ 
-    // Add a menu item to the menu to launch the config
-    GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
+// This is basically a wrapper to let us await GM_config.init()
+async function loadConfig()
+{
+    // Build fields for each site
+    const fields = buildSiteFields();
 
-    // Wrap the initialization in a promise so we can await for it (because we need the values it
-    // loads to do any redirects)
+    // Float the target strings fields to the left so that they can line up with their
+    // corresponding replacements
+    const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
+
+    return await initConfig({
+        id: "URLReplacerRedirectorConfig",
+        title: "URL Replacer/Redirector Config",
+        fields: fields,
+        css: styles,
+    });
+}
+
+// This is just a Promise wrapper that lets us await GM_config's initialization.
+async function initConfig(settings)
+{
     return new Promise((resolve) =>
     {
-        // Float the target strings fields to the left so that they can line up with their
-        // corresponding replacements
-        const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
+        // Have the init event (which should fire once config is done loading) resolve the promise
+        settings["events"] = {init: resolve};
 
-        Config.init({
-            id: "URLReplacerRedirectorConfig",
-            title: "URL Replacer/Redirector Config",
-            fields: buildSiteFields(),
-            css: styles,
-            events: {
-                init: resolve,
-            }
-        });
+        Config.init(settings);
     });
 }
 
@@ -131,7 +145,7 @@ function buildSiteFields()
             click: function (siteToClear)
             {
                 return () => {
-                    console.log("Clearing redirects for site: " + siteToClear);
+                    console.log("Clearing redirects for site: " + siteToClear); //gdbremove
                     Config.set(fieldPrefix(siteToClear), "");
                     Config.set(fieldSuffix(siteToClear), "");
                     Config.set(fieldTargetStrings(siteToClear), "");
@@ -145,53 +159,14 @@ function buildSiteFields()
 }
 
 //gdbdoc talk about how we only support USER matched sites, not included sites (assuming we don't revert that bit)
-function getMatchSites()
+function getMatchSites() // gdbtodo should this just be a parameter passed around instead of a standalone function?
 { 
     return GM_info.script.options.override.use_matches;
 }
 
-function doRedirect()
-{
-    const site = getMatchingSite();
-    console.log("Matching site: " + site);
-    if (!site)
-    {
-        console.log("URL Replacer/Redirector: no matching site found in config");
-        return;
-    }
-
-    // Retrieve config for the current site
-    const prefix             = Config.get(fieldPrefix(site));
-    const suffix             = Config.get(fieldSuffix(site));
-    const targetStrings      = Config.get(fieldTargetStrings(site)).split("\n");
-    const replacementStrings = Config.get(fieldReplacementStrings(site)).split("\n");
-    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings);
-
-    // Build the new URL
-    var newURL = window.location.href;
-    for (let i = 0; i < targetStrings.length; i++)
-    {
-        var toReplace = prefix + targetStrings[i] + suffix;
-        var replaceWith = prefix + replacementStrings[i] + suffix;
-
-        // Use a RegEx to allow case-insensitive matching
-        toReplace = new RegExp(escapeRegex(toReplace), "i");
-
-        newURL = newURL.replace(toReplace, replaceWith);
-    }
-    console.log("Original URL: " + window.location.href);
-    console.log("New URL: " + newURL);
-
-    // Redirect to the new URL
-    if (window.location.href !== newURL)
-    {
-        window.location.replace(newURL);
-    }
-}
-
 function getMatchingSite() {
     // Get sites that user has chosen to include or match (because that's what hotkeys are keyed to, not direct URLs)
-    // const sites = GM_info.script.options.override.use_matches; // gdbtodo figure out how to eliminate this overlap if possible? If worth it?
+    // const sites = GM_info.script.options.override.use_matches;
     // const sites = GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
     // console.log("Matches: " + GM_info.script.options.override.use_matches);
     // console.log("Includes: " + GM_info.script.options.override.use_includes);
@@ -206,6 +181,43 @@ function getMatchingSite() {
         if (siteRegex.test(currentURL)) {
             return site; // First match always wins
         }
+    }
+}
+
+function doRedirect(site)
+{
+
+    // Retrieve config for the current site
+    const prefix             = Config.get(fieldPrefix(site));
+    const suffix             = Config.get(fieldSuffix(site));
+    const targetStrings      = Config.get(fieldTargetStrings(site)).split("\n");
+    const replacementStrings = Config.get(fieldReplacementStrings(site)).split("\n");
+    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings); //gdbremove
+
+    // Build the new URL
+    var newURL = window.location.href;
+    for (let i = 0; i < targetStrings.length; i++)
+    {
+        var toReplace = prefix + targetStrings[i] + suffix;
+        var replaceWith = prefix + replacementStrings[i] + suffix;
+
+        // Use a RegEx to allow case-insensitive matching
+        toReplace = new RegExp(escapeRegex(toReplace), "i");
+
+        newURL = newURL.replace(toReplace, replaceWith);
+    }
+    console.log("Original URL: " + window.location.href + "\nNew URL: " + newURL); //gdbremove
+
+    if (window.location.href !== newURL)
+    { 
+        console.log("URL Replacer/Redirector: current URL is same as redirection target: " + newURL);
+        return
+    }
+
+    // Redirect to the new URL
+    if (window.location.href !== newURL)
+    {
+        window.location.replace(newURL);
     }
 }
 
