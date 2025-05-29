@@ -9,33 +9,39 @@
 // @grant        GM_registerMenuCommand
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_deleteValue
 // @grant        GM.getValue
 // @grant        GM.setValue
 // ==/UserScript==
 
-// ^ Grant GM_*value for legacy Greasemonkey, GM.*value for Greasemonkey 4+
+// Grant GM_*value for legacy Greasemonkey, GM.*value for Greasemonkey 4+
 
-//gdbtodo figure out a conversion from old to new settings style?
-//         - Should basically be able to load the old settings, add them to the GM_config fields, and save it, right? Or do I need a new reload or something then?
+// Settings conversion should be removed after a while, including:
+//  - convertOldStyleSettings()
+//  - Grant for GM_deleteValue
 
-// Our configuration object - this loads/saves settings and handles the config popup.
-var Config = new GM_config();
+// Our configuration instance - this loads/saves settings and handles the config popup.
+const Config = new GM_config();
 
 (async function ()
 {
     'use strict';
+
+    // Find the site that we matched
+    const startURL = window.location.href;
+    const currentSite = getUserSiteForURL(startURL);
     
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
     
-    // Find the site that we matched
-    const startURL = window.location.href;
-    const currentSite = getUserSiteForURL(startURL);
-
     // Set up and load config
     let configSettings = buildConfigSettings(currentSite);
     await initConfigAsync(configSettings); // await because we need to read from the resulting (async-loaded) values
     console.log("First site's prefix: " + Config.get(fieldPrefix(getUserSites()[0]))); //gdbremove
+
+    // Convert old settings style to the new one
+    //  Should be removed after a while.
+    await convertOldStyleSettings(configSettings);
     
     // Get replacement settings for the current URL
     const replaceSettings = getSettingsForSite(currentSite);
@@ -43,16 +49,15 @@ var Config = new GM_config();
     {
         return;
     }
-    console.log("Site replacement settings: " + replaceSettings); //gdbremove
 
-    // Get new URL
+    // Build new URL
     const newURL = transformURL(startURL, replaceSettings);
     console.log("Original URL: " + startURL + "\nNew URL: " + newURL); //gdbremove
     
     // Redirect to the new URL
     if (startURL === newURL)
     { 
-        console.log("URL Replacer/Redirector: current URL is same as redirection target: " + newURL);
+        logToConsole("Current URL is same as redirection target: " + newURL);
         return
     }
     window.location.replace(newURL);
@@ -103,6 +108,41 @@ function getUserSites()
     return GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
 }
 
+// Do the replacements specified by the given settings.
+function transformURL(startURL, siteSettings)
+{
+    const { prefix, suffix, targetStrings, replacementStrings } = siteSettings;
+    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings); //gdbremove
+
+    // Transform the URL
+    var newURL = startURL;
+    for (let i = 0; i < targetStrings.length; i++)
+    {
+        var toReplace = prefix + targetStrings[i] + suffix;
+        var replaceWith = prefix + replacementStrings[i] + suffix;
+
+        // Use a RegEx to allow case-insensitive matching
+        toReplace = new RegExp(escapeRegex(toReplace), "i"); // Escape any regex characters - we don't support actual regex matching.
+
+        newURL = newURL.replace(toReplace, replaceWith);
+    }
+
+    return newURL;
+}
+
+// From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
+function escapeRegex(string)
+{
+    return string.replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
+}
+
+// Log a message to the console with a prefix so we know it's from this script.
+function logToConsole(message)
+{ 
+    console.log("URL Replacer/Redirector: " + message);
+}
+
+//#region Config handling
 // Build the settings object for GM_config.init()
 function buildConfigSettings(currentSite)
 {
@@ -121,6 +161,7 @@ function buildConfigSettings(currentSite)
         .section_desc {
             float: right !important;
             background: #00FF00 !important;
+            color: black !important;
             width: fit-content !important;
             font-weight: bold !important;
             padding: 4px !important;
@@ -151,11 +192,8 @@ function buildSiteFields(currentSite)
             sectionName.push("This site"); // If this is the matched site, add a subheader to call it out
         }
 
-        fields[fieldSection(site)] = {
-            type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
-            section: sectionName,
-        }
         fields[fieldPrefix(site)] = {
+            section: sectionName, // Section definition just goes on the first field inside
             type: "text",
             label: "Prefix",
             labelPos: "left",
@@ -185,6 +223,7 @@ function buildSiteFields(currentSite)
             type: "button",
             label: "Clear redirects for this site",
             title: "Clear all fields for this site, removing all redirection.",
+            save: false, // Don't save this field, it's just a button
             click: function (siteToClear)
             {
                 return () => {
@@ -212,6 +251,7 @@ async function initConfigAsync(settings)
     });
 }
 
+//gdbdoc
 function getSettingsForSite(site)
 {
     if (!site)
@@ -229,39 +269,7 @@ function getSettingsForSite(site)
     }
 }
 
-// Do the replacements specified by the given settings.
-function transformURL(startURL, siteSettings)
-{
-    const { prefix, suffix, targetStrings, replacementStrings } = siteSettings;
-    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings); //gdbremove
-
-    // Transform the URL
-    var newURL = startURL;
-    for (let i = 0; i < targetStrings.length; i++)
-    {
-        var toReplace = prefix + targetStrings[i] + suffix;
-        var replaceWith = prefix + replacementStrings[i] + suffix;
-
-        // Use a RegEx to allow case-insensitive matching
-        toReplace = new RegExp(escapeRegex(toReplace), "i"); // Escape any regex characters - we don't support actual regex matching.
-
-        newURL = newURL.replace(toReplace, replaceWith);
-    }
-
-    return newURL;
-}
-
-// From https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
-function escapeRegex(string)
-{
-    return string.replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
-}
-
 //#region Field name "constants" based on their corresponding sites
-function fieldSection(site)
-{
-    return "Section_" + site;
-}
 function fieldPrefix(site)
 {
     return "Prefix_" + site;
@@ -283,3 +291,61 @@ function fieldClearSite(site)
     return "ClearSite_" + site;
 }
 //#endregion Field name "constants" based on their corresponding sites
+//#endregion Config handling
+
+// Switch from old style of settings (simple GM_setValue/GM_getValue storage, 1 set of settings for
+//  all sites) to the new style (GM_config, one set of settings per site).
+//  Should be removed after a while.
+async function convertOldStyleSettings(gmConfigSettings)
+{
+    // Check the only really required setting (for the script to do anything)
+    const replaceAry = GM_getValue("replaceTheseStrings");
+    if (!replaceAry)
+    {
+        return; // No old settings to convert, done.
+    }
+    logToConsole("Old-style settings found");
+
+    // Safety check: if we ALSO have new-style settings, leave it alone.
+    if (GM_getValue("URLReplacerRedirectorConfig"))
+    {
+        logToConsole("New-style settings already exist, not converting old settings."); // gdbtodo need to make sure this won't always happen (since we initialize the config before this)
+        return;
+    }
+    
+    const replacePrefix = GM_getValue("replacePrefix");
+    const replaceSuffix = GM_getValue("replaceSuffix");
+    
+    // Old style: 1 config for ALL sites
+    // New style: 1 config PER site
+    // So, the conversion is just to copy the config onto each site.
+    logToConsole("Starting settings conversion...");
+    for (var site of getUserSites()) //gdbtodo could/should these various `var`s be `let`s?
+    {
+        // Split replaceAry into targets (keys) and replacements (values)
+        let targetsAry = [];
+        let replacementsAry = [];
+        for (var target in replaceAry)
+        {
+            targetsAry.push(target);
+            replacementsAry.push(replaceAry[target]);
+        }
+
+        Config.set(fieldPrefix(site), replacePrefix);
+        Config.set(fieldSuffix(site), replaceSuffix);
+        Config.set(fieldTargetStrings(site), targetsAry.join("\n"));
+        Config.set(fieldReplacementStrings(site), replacementsAry.join("\n"));
+    }
+
+    // Save new settings
+    Config.save();
+    logToConsole("New-style settings saved.");
+    
+    // Remove the old-style settings so we don't do this again each time.
+    GM_deleteValue("replaceTheseStrings");
+    GM_deleteValue("replacePrefix");
+    GM_deleteValue("replaceSuffix");
+    logToConsole("Old-style settings removed.");
+    
+    logToConsole("Conversion complete.");
+}
