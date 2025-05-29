@@ -1,15 +1,16 @@
 This script redirects user-specified URLs to new ones, by replacing part of the URL.
 
 
+----
 # How to Use
 1. Install with your extension of choice (Tampermonkey, Greasemonkey, etc.)
 2. In the script settings, add the sites you want to affect to either the **user includes** or **user matches**.
-3. Navigate to one of your included/matched sites - this script should be active, and you should see a **Configure redirect settings** option.
-  * If you don't, then you haven't set up your user includes/matches correctly.
+3. Navigate to one of your included/matched sites - this script should be active, and you should see a **Configure redirect settings** option. *If not, something is wrong with your user includes/matches.*
 4. Click the **Configure redirect settings** option to show the config pane. See the **Settings** section below for how to use it.
 5. After saving your settings, redirection should be active - navigate to a matching page to test it.
 
 
+----
 # Settings
 This script works by replacing pieces of the URL.
 
@@ -47,7 +48,7 @@ That mostly works, but there's an issue:
 
 ### Option 1: Make targets more specific
 
-On way to get around this is add more text to the start and/or end of the targets (and since we want to keep that text, also add it to their replacements).
+One way to get around this is add more text to the start and/or end of the targets (and since we want to keep that text, also add it to their replacements).
 
 For example, we might add **company.com/** to the start to make sure we only replace our desired bit:
 | Targets | Replacements |
@@ -73,6 +74,7 @@ Prefix = **company.com/**
 | <font color="orange">**phone**</font> | <font color="violet">**call**</font> |
 
 
+----
 # Changelog
 * 1.0 (5/11/20)
   * Initial release
