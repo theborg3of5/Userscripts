@@ -37,10 +37,8 @@ const Config = new GM_config();
     // Set up and load config
     let configSettings = buildConfigSettings(currentSite);
     await initConfigAsync(configSettings); // await because we need to read from the resulting (async-loaded) values
-    console.log("First site's prefix: " + Config.get(fieldPrefix(getUserSites()[0]))); //gdbremove
 
-    // Convert old settings style to the new one
-    //  Should be removed after a while.
+    // Convert old-style settings if we find them.
     await convertOldStyleSettings(configSettings);
     
     // Get replacement settings for the current URL
@@ -52,7 +50,6 @@ const Config = new GM_config();
 
     // Build new URL
     const newURL = transformURL(startURL, replaceSettings);
-    console.log("Original URL: " + startURL + "\nNew URL: " + newURL); //gdbremove
     
     // Redirect to the new URL
     if (startURL === newURL)
@@ -61,32 +58,15 @@ const Config = new GM_config();
         return
     }
     window.location.replace(newURL);
-
-
-
-//     // Initial creation of settings structure if it doesn't exist
-//     if(!GM_getValue("replaceTheseStrings")) {
-//         GM_setValue("replacePrefix", "");
-//         GM_setValue("replaceSuffix", "");
-//         GM_setValue("replaceTheseStrings", {"toReplace": "replaceWith"});
-//         console.log("Created settings structure");
-//     }
-
-//     // Prefix/suffix apply to both sides
-//     var replacePrefix = GM_getValue("replacePrefix");
-//     var replaceSuffix = GM_getValue("replaceSuffix");
-//     var replaceAry = GM_getValue("replaceTheseStrings");
-// //     console.log(replacePrefix, replaceSuffix, replaceAry);
-
 })();
 
 // Get the site (entry from user includes/matches) that matches the current URL.
 function getUserSiteForURL(startURL)
 {
-    for (var site of getUserSites())
+    for (const site of getUserSites())
     {
         // Use a RegExp so we check case-insensitively
-        var siteRegex = "";
+        let siteRegex = "";
         if (site.startsWith("/"))
         {
             siteRegex = new RegExp(site.slice(1, -1), "i"); // If the site starts with a /, treat it as a regex (but remove the leading/trailing /)
@@ -108,18 +88,17 @@ function getUserSites()
     return GM_info.script.options.override.use_matches.concat(GM_info.script.options.override.use_includes);
 }
 
-// Do the replacements specified by the given settings.
+// Perform the replacements specified by the given settings.
 function transformURL(startURL, siteSettings)
 {
     const { prefix, suffix, targetStrings, replacementStrings } = siteSettings;
-    console.log("Prefix: " + prefix + "\nSuffix: " + suffix + "\nTargets: " + targetStrings + "\nReplacements: " + replacementStrings); //gdbremove
 
     // Transform the URL
-    var newURL = startURL;
+    let newURL = startURL;
     for (let i = 0; i < targetStrings.length; i++)
     {
-        var toReplace = prefix + targetStrings[i] + suffix;
-        var replaceWith = prefix + replacementStrings[i] + suffix;
+        let toReplace = prefix + targetStrings[i] + suffix;
+        const replaceWith = prefix + replacementStrings[i] + suffix;
 
         // Use a RegEx to allow case-insensitive matching
         toReplace = new RegExp(escapeRegex(toReplace), "i"); // Escape any regex characters - we don't support actual regex matching.
@@ -181,9 +160,9 @@ function buildConfigSettings(currentSite)
 
 // Build the specific fields in the config
 function buildSiteFields(currentSite)
-{ 
-    var fields = {};
-    for (var site of getUserSites())
+{
+    let fields = {};
+    for (const site of getUserSites())
     {
         // Section headers are the site URL as the user entered them
         const sectionName = [site];
@@ -251,7 +230,7 @@ async function initConfigAsync(settings)
     });
 }
 
-//gdbdoc
+// Get the settings for the given site.
 function getSettingsForSite(site)
 {
     if (!site)
@@ -270,6 +249,7 @@ function getSettingsForSite(site)
 }
 
 //#region Field name "constants" based on their corresponding sites
+// These are also the keys used with [GM_]Config.get/set.
 function fieldPrefix(site)
 {
     return "Prefix_" + site;
@@ -293,9 +273,8 @@ function fieldClearSite(site)
 //#endregion Field name "constants" based on their corresponding sites
 //#endregion Config handling
 
-// Switch from old style of settings (simple GM_setValue/GM_getValue storage, 1 set of settings for
-//  all sites) to the new style (GM_config, one set of settings per site).
-//  Should be removed after a while.
+// Convert settings from the old style (simple GM_setValue/GM_getValue storage, 1 config for all
+//  sites) to the new style (GM_config, one set of settings per site).
 async function convertOldStyleSettings(gmConfigSettings)
 {
     // Check the only really required setting (for the script to do anything)
@@ -309,7 +288,7 @@ async function convertOldStyleSettings(gmConfigSettings)
     // Safety check: if we ALSO have new-style settings, leave it alone.
     if (GM_getValue("URLReplacerRedirectorConfig"))
     {
-        logToConsole("New-style settings already exist, not converting old settings."); // gdbtodo need to make sure this won't always happen (since we initialize the config before this)
+        logToConsole("New-style settings already exist, not converting old settings.");
         return;
     }
     
@@ -320,12 +299,12 @@ async function convertOldStyleSettings(gmConfigSettings)
     // New style: 1 config PER site
     // So, the conversion is just to copy the config onto each site.
     logToConsole("Starting settings conversion...");
-    for (var site of getUserSites()) //gdbtodo could/should these various `var`s be `let`s?
+    for (const site of getUserSites())
     {
         // Split replaceAry into targets (keys) and replacements (values)
         let targetsAry = [];
         let replacementsAry = [];
-        for (var target in replaceAry)
+        for (const target in replaceAry)
         {
             targetsAry.push(target);
             replacementsAry.push(replaceAry[target]);
