@@ -32,7 +32,7 @@ const Config = new GM_config();
     const currentSite = getUserSiteForURL(startURL);
     
     // Add a menu item to the menu to launch the config
-    GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
+    GM_registerMenuCommand('Configure redirect settings', () => Config.open());
     
     // Set up and load config
     let configSettings = buildConfigSettings(currentSite);
