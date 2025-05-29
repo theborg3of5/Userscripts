@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         URL Replacer/Redirector
 // @namespace    https://github.com/theborg3of5/Userscripts/
-// @version      1.2
+// @version      2.0
 // @description  Redirect specific sites by replacing part of the URL.
 // @author       Gavin Borg
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js

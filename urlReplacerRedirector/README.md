@@ -80,7 +80,7 @@ Prefix = **company.com/**
   * Initial release
 * 1.1 (3/17/21)
   * Make URL matching case-insensitive
-* 1.2 (5/29/25): Major rewrite!
+* 2.0 (5/29/25): Major rewrite!
   * Added a proper settings page using [GM_Config](https://github.com/sizzlemctwizzle/GM_config):
     * No more messing around with JSON in extension/script storage!
     * The settings page can be launched from any included/matched site - look for the "Configure redirect settings" option under your extension (Tampermonkey, Greasemonkey, etc.) menu.
