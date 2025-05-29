@@ -18,43 +18,48 @@ This script works by replacing pieces of the URL.
 Each line in the **Targets** field will be replaced by the same line in the **Replacements** field.
 
 For example, consider these settings:
+
 | Targets | Replacements |
 | ------- | ------------ |
-| <font color="red">**In**</font>   | <font color="green">**Out**</font>    |
-| <font color="orange">**Up**</font> | <font color="violet">**Down**</font> |
+| <span style="color:red">**In**</span>    | <span style="color:green">**Out**</span>   |
+| <span style="color:orange">**Up**</span> | <span style="color:violet">**Down**</span> |
 
 With these settings, we would redirect as follows:
+
 | Page | Redirects To | Notes
 | ---- | ------------ | -----
-| https://www.google.com/<font color="red">**In**</font>/query | https://www.google.com/<font color="green">**Out**</font>/query | 
-| https://www.google.com/<font color="red">**IN**</font>/query | https://www.google.com/<font color="green">**Out**</font>/query | We ignore case when matching (replacements match config casing)
-| https://www.google.com/<font color="red">**IN**</font>/query/<font color="orange">**Up**</font>/<font color="red">**in**</font>/blog | https://www.google.com/<font color="green">**Out**</font>/query/<font color="violet">**Down**</font>/<font color="green">**Out**</font>/blog | All matches are replaced (including multiple of same target)
+| https://www.google.com/<span style="color:red">**In**</span>/query | https://www.google.com/<span style="color:green">**Out**</span>/query | 
+| https://www.google.com/<span style="color:red">**IN**</span>/query | https://www.google.com/<span style="color:green">**Out**</span>/query | We ignore case when matching (replacements match config casing)
+| https://www.google.com/<span style="color:red">**IN**</span>/query/<span style="color:orange">**Up**</span>/<span style="color:red">**in**</span>/blog | https://www.google.com/<span style="color:green">**Out**</span>/query/<span style="color:violet">**Down**</span>/<span style="color:green">**Out**</span>/blog | All matches are replaced (including multiple of same target)
 
 ## Advanced
 A URL-wide find/replace can be too much - it's very easy to replace something you don't want.
 
 For example, say you want to redirect from company.com/**phone** to company.com/**call**. You might use these settings:
+
 | Targets | Replacements |
 | ------- | ------------ |
-| <font color="red">**action**</font>   | <font color="green">**do**</font>    |
-| <font color="orange">**phone**</font> | <font color="violet">**call**</font> |
+| <span style="color:red">**action**</span>   | <span style="color:green">**do**</span>    |
+| <span style="color:orange">**phone**</span> | <span style="color:violet">**call**</span> |
 
 That mostly works, but there's an issue:
+
 | Page | Redirects To | Notes
 | ---- | ------------ | -----
-| company.com/<font color="orange">**phone**</font> | company.com/<font color="violet">**call**</font> | 
-| company.com/<font color="red">**action**</font>/getinfo | company.com/<font color="green">**do**</font>/getinfo |
-| company.com/<font color="red">**action**</font>/find-my-<font color="orange">**phone**</font> | company.com/<font color="green">**do**</font>/find-my-<font color="violet">**call**</font> | <-- We didn't want to replace <font color="orange">**phone**</font> here!
+| company.com/<span style="color:orange">**phone**</span> | company.com/<span style="color:violet">**call**</span> | 
+| company.com/<span style="color:red">**action**</span>/getinfo | company.com/<span style="color:green">**do**</span>/getinfo |
+| company.com/<span style="color:red">**action**</span>/find-my-<span style="color:orange">**phone**</span> | company.com/<span style="color:green">**do**</span>/find-my-<span style="color:violet">**call**</span> | <-- We didn't want to replace <span style="color:orange">**phone**</span> here!
 
 ### Option 1: Make targets more specific
 
 One way to get around this is add more text to the start and/or end of the targets (and since we want to keep that text, also add it to their replacements).
 
 For example, we might add **company.com/** to the start to make sure we only replace our desired bit:
+
 | Targets | Replacements |
 | ------- | ------------ |
-| <font color="red">**company.com/action**</font>   | <font color="green">**company.com/do**</font>    |
-| <font color="orange">**company.com/phone**</font> | <font color="violet">**company.com/call**</font> |
+| <span style="color:red">**company.com/action**</span>   | <span style="color:green">**company.com/do**</span>    |
+| <span style="color:orange">**company.com/phone**</span> | <span style="color:violet">**company.com/call**</span> |
 
 This works fine, but it's clunky when we're adding the same text to the start/end of every target and replacement.
 
@@ -70,8 +75,8 @@ Prefix = **company.com/**
 
 | Targets | Replacements |
 | ------- | ------------ |
-| <font color="red">**action**</font>   | <font color="green">**do**</font>    |
-| <font color="orange">**phone**</font> | <font color="violet">**call**</font> |
+| <span style="color:red">**action**</span>   | <span style="color:green">**do**</span>    |
+| <span style="color:orange">**phone**</span> | <span style="color:violet">**call**</span> |
 
 
 ----
