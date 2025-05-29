@@ -13,16 +13,10 @@
 // @grant        GM.setValue
 // ==/UserScript==
 
-// Grant GM_*value for legacy Greasemonkey, GM.*value for Greasemonkey 4+
+// ^ Grant GM_*value for legacy Greasemonkey, GM.*value for Greasemonkey 4+
 
 //gdbtodo figure out a conversion from old to new settings style?
 //         - Should basically be able to load the old settings, add them to the GM_config fields, and save it, right? Or do I need a new reload or something then?
-
-//gdbtodo new idea for config handling: use the greasy fork page and/or the github page to host the config
-//         - That way there's always a reliable spot they can go to
-//         - Just make the config available via menu on any included/matched site
-//         - Include a "delete redirects for this site" button at the site level
-//         - When you're on an included page, consider highlighting it somehow (to make it easier when adding new redirects)
 
 // Our configuration object - this loads/saves settings and handles the config popup.
 var Config = new GM_config();
@@ -34,14 +28,17 @@ var Config = new GM_config();
     // Add a menu item to the menu to launch the config
     GM_registerMenuCommand('Configure redirect sites and settings', () => Config.open());
     
+    // Find the site that we matched
+    const startURL = window.location.href;
+    const currentSite = getUserSiteForURL(startURL);
+
     // Set up and load config
-    let configSettings = buildConfigSettings();
-    await initConfigAsync(configSettings); // await because we need to read from these (async-loaded) values
+    let configSettings = buildConfigSettings(currentSite);
+    await initConfigAsync(configSettings); // await because we need to read from the resulting (async-loaded) values
     console.log("First site's prefix: " + Config.get(fieldPrefix(getUserSites()[0]))); //gdbremove
     
     // Get replacement settings for the current URL
-    const startURL = window.location.href;
-    const replaceSettings = getSettingsForURL(startURL);
+    const replaceSettings = getSettingsForSite(currentSite);
     if (!replaceSettings)
     {
         return;
@@ -78,6 +75,28 @@ var Config = new GM_config();
 
 })();
 
+// Get the site (entry from user includes/matches) that matches the current URL.
+function getUserSiteForURL(startURL)
+{
+    for (var site of getUserSites())
+    {
+        // Use a RegExp so we check case-insensitively
+        var siteRegex = "";
+        if (site.startsWith("/"))
+        {
+            siteRegex = new RegExp(site.slice(1, -1), "i"); // If the site starts with a /, treat it as a regex (but remove the leading/trailing /)
+        }
+        else
+        {
+            siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*"), "i"); // Otherwise replace * wildcards with regex-style [^ ]* wildcards
+        }
+
+        if (siteRegex.test(startURL)) {
+            return site; // First match always wins
+        }
+    }
+}
+
 // We support both includes and matches, but only the user-overridden ones of each.
 function getUserSites()
 { 
@@ -85,14 +104,31 @@ function getUserSites()
 }
 
 // Build the settings object for GM_config.init()
-function buildConfigSettings()
+function buildConfigSettings(currentSite)
 {
     // Build fields for each site
-    const fields = buildSiteFields();
+    const fields = buildSiteFields(currentSite);
 
-    // Float the target strings fields to the left so that they can line up with their
-    // corresponding replacements
-    const styles = "div[id*=" + fieldTargetStrings("") + "] { float: left; }"; // id contains the the target strings id prefix
+    const styles = `
+        /* Float the target strings fields to the left so that they can line up with their corresponding replacements */
+        div[id*=${fieldTargetStrings("")}] {
+            float: left;
+        }
+
+        /* We use one section sub-header on the current site to call it out. We're overriding the
+            default settings from the framework (which include the ID), so !important is needed for
+            most of these properties. */
+        .section_desc {
+            float: right !important;
+            background: #00FF00 !important;
+            width: fit-content !important;
+            font-weight: bold !important;
+            padding: 4px !important;
+            margin: 0px auto !important;
+            border-top: none !important;
+            border-radius: 0px 0px 10px 10px !important;
+        }";
+    `.replaceAll("\n", ""); // This format is nicer to read but the newlines cause issues in the config framework, so remove them
 
     return {
         id: "URLReplacerRedirectorConfig",
@@ -103,14 +139,21 @@ function buildConfigSettings()
 }
 
 // Build the specific fields in the config
-function buildSiteFields()
+function buildSiteFields(currentSite)
 { 
     var fields = {};
     for (var site of getUserSites())
     {
+        // Section headers are the site URL as the user entered them
+        const sectionName = [site];
+        if (currentSite === site)
+        {
+            sectionName.push("This site"); // If this is the matched site, add a subheader to call it out
+        }
+
         fields[fieldSection(site)] = {
             type: "hidden", // Using a hidden field just to create the section header (could technically go on the prefix field below)
-            section: site,
+            section: sectionName,
         }
         fields[fieldPrefix(site)] = {
             type: "text",
@@ -145,7 +188,6 @@ function buildSiteFields()
             click: function (siteToClear)
             {
                 return () => {
-                    console.log("Clearing redirects for site: " + siteToClear); //gdbremove
                     Config.set(fieldPrefix(siteToClear), "");
                     Config.set(fieldSuffix(siteToClear), "");
                     Config.set(fieldTargetStrings(siteToClear), "");
@@ -170,13 +212,11 @@ async function initConfigAsync(settings)
     });
 }
 
-function getSettingsForURL(startURL)
+function getSettingsForSite(site)
 {
-    // Find the site that we matched
-    const site = getUserSiteForURL(startURL);
     if (!site)
     {
-        console.log("No matching site found for URL: " + startURL);
+        console.log("No matching site found for URL");
         return null;
     }
 
@@ -186,28 +226,6 @@ function getSettingsForURL(startURL)
         suffix:             Config.get(fieldSuffix(site)),
         targetStrings:      Config.get(fieldTargetStrings(site)).split("\n"),
         replacementStrings: Config.get(fieldReplacementStrings(site)).split("\n"),
-    }
-}
-
-// Get the site (entry from user includes/matches) that matches the current URL.
-function getUserSiteForURL(startURL)
-{
-    for (var site of getUserSites())
-    {
-        // Use a RegExp so we check case-insensitively
-        var siteRegex = "";
-        if (site.startsWith("/"))
-        {
-            siteRegex = new RegExp(site.slice(1, -1), "i"); // If the site starts with a /, treat it as a regex (but remove the leading/trailing /)
-        }
-        else
-        {
-            siteRegex = new RegExp(site.replace(/\*/g, "[^ ]*"), "i"); // Otherwise replace * wildcards with regex-style [^ ]* wildcards
-        }
-
-        if (siteRegex.test(startURL)) {
-            return site; // First match always wins
-        }
     }
 }
 
