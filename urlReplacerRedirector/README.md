@@ -1,6 +1,9 @@
 This script redirects user-specified URLs to new ones, by replacing part of the URL.
 
 
+NOTE: this script does NOT work in ViolentMonkey (as the extension does not provide access to user-overridden matches/includes, which this script requires).
+
+
 ----
 # How to Use
 1. Install with your extension of choice (Tampermonkey, Greasemonkey, etc.)
