@@ -15,7 +15,11 @@ NOTE: this script does NOT work in ViolentMonkey (as the extension does not prov
 
 ----
 # Settings
-This script works by replacing pieces of the URL.
+This script works by replacing pieces of the URL. Its replacement settings live in your extension's toolbar menu (when you're on a page where the script is active).
+
+For example, in Tampermonkey:
+
+![Location of the settings option in Tampermonkey](https://github.com/theborg3of5/Userscripts/blob/master/urlReplacerRedirector/SettingsMenu.png?raw=true)
 
 ## Simple
 Each line in the **Targets** field will be replaced by the same line in the **Replacements** field.
